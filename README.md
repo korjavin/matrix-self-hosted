@@ -23,10 +23,30 @@ This project provides infrastructure configuration to deploy a Matrix messaging 
 
 ## Quick Start
 
+### Automated Setup (Recommended)
+
+```bash
+# Clone this repository
+git clone https://github.com/korjavin/matrix-self-hosted.git
+cd matrix-self-hosted
+
+# Run the setup script
+./setup.sh
+
+# Create external network (if needed)
+docker network create matrix-network
+
+# Start the services  
+docker-compose up -d
+```
+
+### Manual Setup
+
 1. Clone this repository
-2. Copy and configure environment variables
-3. Deploy using Docker Compose or Portainer
-4. Access your Matrix server at your configured domain
+2. Copy `.env.template` to `.env` and configure all variables
+3. Generate secure secrets: `openssl rand -hex 32`
+4. Create external network: `docker network create matrix-network`
+5. Deploy: `docker-compose up -d`
 
 ## Configuration
 
@@ -66,6 +86,32 @@ Persistent volumes are configured for:
 - Configuration files
 - Media storage
 - Database (if applicable)
+
+## Troubleshooting
+
+### Common Issues
+
+**PostgreSQL password error**: Ensure `POSTGRES_PASSWORD` is set in your `.env` file
+**Permission denied on init script**: Use the provided `setup.sh` script or check file permissions
+**Network issues**: Create the external network: `docker network create matrix-network`
+**Health check failures**: Wait for all services to start, check `docker-compose logs`
+
+### Useful Commands
+
+```bash
+# Check service status
+docker-compose ps
+
+# View logs
+docker-compose logs -f synapse
+docker-compose logs -f postgres
+
+# Restart services
+docker-compose restart
+
+# Rebuild and restart
+docker-compose down && docker-compose up -d
+```
 
 ## Support
 
