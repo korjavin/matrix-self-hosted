@@ -38,7 +38,7 @@ services:
       - "traefik.http.routers.matrix-synapse.rule=Host(`${MATRIX_DOMAIN:-matrix.example.com}`)"
       - "traefik.http.routers.matrix-synapse.entrypoints=websecure"
       - "traefik.http.routers.matrix-synapse.tls.certresolver=myresolver"
-      - "traefik.http.services.matrix-synapse.loadbalancer.server.port=8008"
+      - "traefik.http.services.matrix-synapse.loadbalancer.server.port=7073"
       # Matrix federation
       - "traefik.http.routers.matrix-federation.rule=Host(`${MATRIX_DOMAIN:-matrix.example.com}`) && Path(`/_matrix/`)"
       - "traefik.http.routers.matrix-federation.entrypoints=websecure"
@@ -47,7 +47,7 @@ services:
       - "traefik.http.services.matrix-federation.loadbalancer.server.port=8448"
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "curl -fSs http://localhost:8008/health || exit 1"]
+      test: ["CMD-SHELL", "curl -fSs http://localhost:7073/health || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3

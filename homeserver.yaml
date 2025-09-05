@@ -16,7 +16,7 @@ pid_file: /data/homeserver.pid
 listeners:
   # Main HTTPS listener
   # For when matrix traffic is sent directly to synapse.
-  - port: 8008
+  - port: 7073
     tls: false
     type: http
     x_forwarded: true
