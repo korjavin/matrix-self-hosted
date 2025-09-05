@@ -1,7 +1,7 @@
 services:
-  synapse:
+  synapse-init:
     image: matrixdotorg/synapse:latest
-    container_name: matrix-synapse
+    container_name: matrix-synapse-init
     environment:
       - MATRIX_DOMAIN=${MATRIX_DOMAIN:-matrix.example.com}
       - ELEMENT_DOMAIN=${ELEMENT_DOMAIN:-element.example.com}
@@ -10,21 +10,57 @@ services:
       - POSTGRES_DB=${POSTGRES_DB:-synapse}
       - REGISTRATION_SHARED_SECRET=${REGISTRATION_SHARED_SECRET:-}
       - TURN_SHARED_SECRET=${TURN_SHARED_SECRET:-}
+    volumes:
+      - synapse_data:/data
+      - ./homeserver.yaml:/tmp/homeserver.yaml:ro
+      - ./log.config:/tmp/log.config:ro
+    networks:
+      - matrix-network
+    entrypoint: /bin/bash
+    command: >
+      -c "
+        echo 'Initializing Matrix Synapse configuration...' &&
+        MATRIX_DOMAIN=$${MATRIX_DOMAIN:-matrix.example.com} &&
+        ELEMENT_DOMAIN=$${ELEMENT_DOMAIN:-element.example.com} &&
+        POSTGRES_USER=$${POSTGRES_USER:-synapse} &&
+        POSTGRES_PASSWORD=$${POSTGRES_PASSWORD:-changeme123} &&
+        POSTGRES_DB=$${POSTGRES_DB:-synapse} &&
+        REGISTRATION_SHARED_SECRET=$${REGISTRATION_SHARED_SECRET:-$(openssl rand -hex 32)} &&
+        TURN_SHARED_SECRET=$${TURN_SHARED_SECRET:-$(openssl rand -hex 32)} &&
+        mkdir -p /data &&
+        cp /tmp/homeserver.yaml /data/homeserver.yaml &&
+        cp /tmp/log.config /data/$$MATRIX_DOMAIN.log.config &&
+        sed -i 's/MATRIX_DOMAIN_PLACEHOLDER/'$$MATRIX_DOMAIN'/g' /data/homeserver.yaml &&
+        sed -i 's/ELEMENT_DOMAIN_PLACEHOLDER/'$$ELEMENT_DOMAIN'/g' /data/homeserver.yaml &&
+        sed -i 's/POSTGRES_USER_PLACEHOLDER/'$$POSTGRES_USER'/g' /data/homeserver.yaml &&
+        sed -i 's/POSTGRES_PASSWORD_PLACEHOLDER/'$$POSTGRES_PASSWORD'/g' /data/homeserver.yaml &&
+        sed -i 's/POSTGRES_DB_PLACEHOLDER/'$$POSTGRES_DB'/g' /data/homeserver.yaml &&
+        sed -i 's/REGISTRATION_SHARED_SECRET_PLACEHOLDER/'$$REGISTRATION_SHARED_SECRET'/g' /data/homeserver.yaml &&
+        sed -i 's/TURN_SHARED_SECRET_PLACEHOLDER/'$$TURN_SHARED_SECRET'/g' /data/homeserver.yaml &&
+        if [ ! -f \"/data/$$MATRIX_DOMAIN.signing.key\" ]; then
+          echo 'Generating signing key...' &&
+          python -m synapse.app.homeserver --generate-keys --config-path /data/homeserver.yaml
+        fi &&
+        echo 'Configuration completed successfully!'
+      "
+    restart: "no"
+
+  synapse:
+    image: matrixdotorg/synapse:latest
+    container_name: matrix-synapse
+    environment:
       - UID=991
       - GID=991
     volumes:
       - synapse_data:/data
-      - ./homeserver.yaml:/opt/homeserver.yaml:ro
-      - ./log.config:/opt/log.config:ro
-      - ./init-config.sh:/opt/init-config.sh:ro
     networks:
       - matrix-network
-    user: root
-    command: >
-      sh -c "
-        chmod +x /opt/init-config.sh &&
-        exec /opt/init-config.sh
-      "
+    command: ["run", "--config-path", "/data/homeserver.yaml"]
+    depends_on:
+      synapse-init:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.matrix-synapse.rule=Host(`${MATRIX_DOMAIN:-matrix.example.com}`)"
