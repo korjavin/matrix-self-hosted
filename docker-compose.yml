@@ -1,8 +1,6 @@
-version: "3.8"
-
 services:
   synapse:
-    image: matrixdotorg/synapse:latest
+    build: .
     container_name: matrix-synapse
     environment:
       - MATRIX_DOMAIN=${MATRIX_DOMAIN:-matrix.example.com}
@@ -16,12 +14,8 @@ services:
       - GID=991
     volumes:
       - synapse_data:/data
-      - ./homeserver.yaml:/opt/homeserver.yaml:ro
-      - ./log.config:/opt/log.config:ro
-      - ./init-config.sh:/opt/init-config.sh:ro
     networks:
       - matrix-network
-    entrypoint: ["/bin/sh", "-c", "/opt/init-config.sh && exec python -m synapse.app.homeserver --config-path /data/homeserver.yaml"]
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.matrix-synapse.rule=Host(`${MATRIX_DOMAIN:-matrix.example.com}`)"
