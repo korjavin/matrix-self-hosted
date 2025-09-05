@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 set -e
 
 # Matrix configuration initialization script
@@ -7,13 +7,8 @@ set -e
 MATRIX_DOMAIN=${MATRIX_DOMAIN:-matrix.example.com}
 ELEMENT_DOMAIN=${ELEMENT_DOMAIN:-element.example.com}
 POSTGRES_USER=${POSTGRES_USER:-synapse}
-POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme123}
 POSTGRES_DB=${POSTGRES_DB:-synapse}
-
-if [ -z "$POSTGRES_PASSWORD" ]; then
-    echo "ERROR: POSTGRES_PASSWORD environment variable is required"
-    exit 1
-fi
 
 # Generate random secrets if not provided
 if [ -z "$REGISTRATION_SHARED_SECRET" ]; then
@@ -55,3 +50,7 @@ fi
 echo "Configuration initialization completed successfully!"
 echo "Matrix server: https://$MATRIX_DOMAIN"
 echo "Element client: https://$ELEMENT_DOMAIN"
+
+# Start Synapse with the processed configuration
+echo "Starting Synapse..."
+exec python -m synapse.app.homeserver --config-path /data/homeserver.yaml

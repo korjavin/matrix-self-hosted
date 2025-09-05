@@ -19,7 +19,12 @@ services:
       - ./init-config.sh:/opt/init-config.sh:ro
     networks:
       - matrix-network
-    command: ["/bin/sh", "-c", "chmod +x /opt/init-config.sh && /opt/init-config.sh && exec python -m synapse.app.homeserver --config-path /data/homeserver.yaml"]
+    user: root
+    command: >
+      sh -c "
+        chmod +x /opt/init-config.sh &&
+        exec /opt/init-config.sh
+      "
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.matrix-synapse.rule=Host(`${MATRIX_DOMAIN:-matrix.example.com}`)"
