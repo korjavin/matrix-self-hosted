@@ -35,14 +35,17 @@ services:
         condition: service_healthy
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.matrix-synapse.rule=Host(`${MATRIX_DOMAIN:-matrix.example.com}`)"
+      # Matrix client and server APIs (including .well-known)
+      - "traefik.http.routers.matrix-synapse.rule=Host(`${MATRIX_DOMAIN:-matrix.example.com}`) && (PathPrefix(`/_matrix/`) || PathPrefix(`/.well-known/matrix/`))"
       - "traefik.http.routers.matrix-synapse.entrypoints=websecure"
       - "traefik.http.routers.matrix-synapse.tls.certresolver=myresolver"
+      - "traefik.http.routers.matrix-synapse.priority=100"
       - "traefik.http.services.matrix-synapse.loadbalancer.server.port=7073"
-      # Matrix federation
-      - "traefik.http.routers.matrix-federation.rule=Host(`${MATRIX_DOMAIN:-matrix.example.com}`) && Path(`/_matrix/`)"
+      # Matrix federation on port 8448 (for servers that don't use .well-known)
+      - "traefik.http.routers.matrix-federation.rule=Host(`${MATRIX_DOMAIN:-matrix.example.com}`) && PathPrefix(`/_matrix/federation/`)"
       - "traefik.http.routers.matrix-federation.entrypoints=websecure"
       - "traefik.http.routers.matrix-federation.tls.certresolver=myresolver"
+      - "traefik.http.routers.matrix-federation.priority=200"
       - "traefik.http.routers.matrix-federation.service=matrix-federation"
       - "traefik.http.services.matrix-federation.loadbalancer.server.port=8448"
     restart: unless-stopped

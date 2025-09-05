@@ -110,6 +110,9 @@ old_signing_keys: {}
 trusted_key_servers:
   - server_name: "matrix.org"
 
+# Server discovery for Matrix clients
+serve_server_wellknown: true
+
 # Rate limiting
 rc_message:
   per_second: 0.2
