@@ -41,19 +41,19 @@ services:
       - "traefik.http.routers.matrix-wellknown.tls.certresolver=myresolver"
       - "traefik.http.routers.matrix-wellknown.priority=300"
       - "traefik.http.routers.matrix-wellknown.service=matrix-synapse"
-      # Matrix client and server APIs  
+      # Matrix federation on port 8448 (highest priority for specific paths)
+      - "traefik.http.routers.matrix-federation.rule=Host(`${MATRIX_DOMAIN:-matrix.example.com}`) && PathPrefix(`/_matrix/federation/`)"
+      - "traefik.http.routers.matrix-federation.entrypoints=websecure"
+      - "traefik.http.routers.matrix-federation.tls.certresolver=myresolver"
+      - "traefik.http.routers.matrix-federation.priority=250"
+      - "traefik.http.routers.matrix-federation.service=matrix-federation"
+      - "traefik.http.services.matrix-federation.loadbalancer.server.port=8448"
+      # Matrix client and server APIs (lower priority for broader paths)
       - "traefik.http.routers.matrix-synapse.rule=Host(`${MATRIX_DOMAIN:-matrix.example.com}`) && PathPrefix(`/_matrix/`)"
       - "traefik.http.routers.matrix-synapse.entrypoints=websecure"
       - "traefik.http.routers.matrix-synapse.tls.certresolver=myresolver"
       - "traefik.http.routers.matrix-synapse.priority=200"
       - "traefik.http.services.matrix-synapse.loadbalancer.server.port=7073"
-      # Matrix federation on port 8448 (for servers that don't use .well-known)
-      - "traefik.http.routers.matrix-federation.rule=Host(`${MATRIX_DOMAIN:-matrix.example.com}`) && PathPrefix(`/_matrix/federation/`)"
-      - "traefik.http.routers.matrix-federation.entrypoints=websecure"
-      - "traefik.http.routers.matrix-federation.tls.certresolver=myresolver"
-      - "traefik.http.routers.matrix-federation.priority=100"
-      - "traefik.http.routers.matrix-federation.service=matrix-federation"
-      - "traefik.http.services.matrix-federation.loadbalancer.server.port=8448"
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "curl -fSs http://localhost:7073/health || exit 1"]
