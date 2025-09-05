@@ -1,0 +1,51 @@
+name: Validate Configuration
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Validate docker-compose.yml syntax
+        run: |
+          echo "Validating docker-compose.yml syntax..."
+          docker-compose config -q
+          echo "✅ docker-compose.yml is valid"
+
+      - name: Check environment template
+        run: |
+          echo "Checking environment configuration..."
+          if [ -f ".env.template" ]; then
+            echo "✅ Environment template found"
+          else
+            echo "⚠️  No .env.template found"
+          fi
+
+      - name: Security scan for secrets
+        run: |
+          echo "Scanning for potential secrets..."
+          # Check for common secret patterns
+          if grep -r -i "password\|secret\|key\|token" --include="*.yml" --include="*.yaml" --include="*.json" . | grep -v "template\|example"; then
+            echo "⚠️  Potential secrets found in configuration files"
+            echo "Please ensure no actual secrets are committed to the repository"
+          else
+            echo "✅ No secrets detected in configuration files"
+          fi
+
+      - name: Lint YAML files
+        uses: karancode/yamllint-github-action@master
+        with:
+          yamllint_file_or_dir: 'docker-compose.yml .github/workflows/'
+          yamllint_config_filepath: '.yamllint.yml'
+        continue-on-error: true

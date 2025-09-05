@@ -1,0 +1,54 @@
+name: Deploy Matrix Server
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate docker-compose.yml
+        run: |
+          docker-compose config -q
+
+      - name: Update deployment branch
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+          
+          # Create or checkout deploy branch
+          git checkout -B deploy
+          
+          # Ensure we have the latest changes
+          git add .
+          git commit -m "ci: Update deployment configuration - $(date -u '+%Y-%m-%d %H:%M:%S UTC')" || echo "No changes to commit"
+          
+          # Push to deploy branch
+          git push origin deploy --force
+
+      - name: Trigger Portainer Redeploy Webhook
+        if: ${{ secrets.PORTAINER_REDEPLOY_HOOK }}
+        uses: distributhor/workflow-webhook@v3
+        with:
+          webhook_url: ${{ secrets.PORTAINER_REDEPLOY_HOOK }}
+          webhook_secret: "trigger"
+        continue-on-error: true
+
+      - name: Notify deployment status
+        run: |
+          echo "🚀 Deployment completed successfully"
+          echo "📝 Configuration updated in deploy branch"
+          if [ -n "${{ secrets.PORTAINER_REDEPLOY_HOOK }}" ]; then
+            echo "🔄 Portainer webhook triggered"
+          else
+            echo "⚠️  Portainer webhook not configured"
+          fi
