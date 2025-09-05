@@ -113,6 +113,13 @@ trusted_key_servers:
 # Server discovery for Matrix clients
 serve_server_wellknown: true
 
+# Well-known server delegation
+well_known_client_content:
+  "m.homeserver":
+    "base_url": "https://MATRIX_DOMAIN_PLACEHOLDER"
+  "m.identity_server":
+    "base_url": "https://vector.im"
+
 # Rate limiting
 rc_message:
   per_second: 0.2
