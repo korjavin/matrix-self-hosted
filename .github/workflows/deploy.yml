@@ -20,6 +20,12 @@ jobs:
         run: |
           docker compose config -q
 
+      - name: Update image tags with commit SHA
+        run: |
+          # Update docker-compose to use specific commit SHA tags for production
+          sed -i "s|ghcr.io/korjavin/matrix-self-hosted/synapse:latest|ghcr.io/korjavin/matrix-self-hosted/synapse:sha-${GITHUB_SHA:0:7}|g" docker-compose.yml
+          sed -i "s|ghcr.io/korjavin/matrix-self-hosted/element:latest|ghcr.io/korjavin/matrix-self-hosted/element:sha-${GITHUB_SHA:0:7}|g" docker-compose.yml
+          
       - name: Update deployment branch
         run: |
           git config user.name "GitHub Actions Bot"
@@ -28,9 +34,9 @@ jobs:
           # Create or checkout deploy branch
           git checkout -B deploy
           
-          # Ensure we have the latest changes
-          git add .
-          git commit -m "ci: Update deployment configuration - $(date -u '+%Y-%m-%d %H:%M:%S UTC')" || echo "No changes to commit"
+          # Add the updated docker-compose with specific image tags
+          git add docker-compose.yml
+          git commit -m "ci: Update deployment configuration with images sha-${GITHUB_SHA:0:7} - $(date -u '+%Y-%m-%d %H:%M:%S UTC')" || echo "No changes to commit"
           
           # Push to deploy branch
           git push origin deploy --force

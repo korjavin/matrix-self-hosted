@@ -1,0 +1,7 @@
+FROM vectorim/element-web:latest
+
+# Copy custom element configuration
+COPY element-config.json /app/config.json
+
+# The base image already sets up nginx to serve the files
+# No additional configuration needed

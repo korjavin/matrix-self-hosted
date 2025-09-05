@@ -8,6 +8,8 @@ This project provides infrastructure configuration to deploy a Matrix messaging 
 
 ## Features
 
+- **Custom Docker Images**: Pre-built images with embedded configuration templates
+- **GitHub Container Registry**: Images automatically built and pushed to GHCR
 - **Docker Compose Configuration**: Ready-to-use compose files for Portainer deployment
 - **Traefik Integration**: Pre-configured labels for automatic HTTPS certificate management
 - **Environment-based Configuration**: Domain and service settings via environment variables
@@ -47,6 +49,15 @@ docker compose up -d
 3. Generate secure secrets: `openssl rand -hex 32`
 4. Create external network: `docker network create matrix-network`
 5. Deploy: `docker compose up -d`
+
+## Docker Images
+
+This project uses custom Docker images hosted on GitHub Container Registry (GHCR):
+
+- **Synapse**: `ghcr.io/korjavin/matrix-self-hosted/synapse:latest`
+- **Element Web**: `ghcr.io/korjavin/matrix-self-hosted/element:latest`
+
+Images are automatically built and pushed when configuration files change. No need to build locally for Portainer deployments.
 
 ## Configuration
 
