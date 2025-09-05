@@ -37,7 +37,7 @@ cd matrix-self-hosted
 docker network create matrix-network
 
 # Start the services  
-docker-compose up -d
+docker compose up -d
 ```
 
 ### Manual Setup
@@ -46,7 +46,7 @@ docker-compose up -d
 2. Copy `.env.template` to `.env` and configure all variables
 3. Generate secure secrets: `openssl rand -hex 32`
 4. Create external network: `docker network create matrix-network`
-5. Deploy: `docker-compose up -d`
+5. Deploy: `docker compose up -d`
 
 ## Configuration
 
@@ -100,17 +100,17 @@ Persistent volumes are configured for:
 
 ```bash
 # Check service status
-docker-compose ps
+docker compose ps
 
 # View logs
-docker-compose logs -f synapse
-docker-compose logs -f postgres
+docker compose logs -f synapse
+docker compose logs -f postgres
 
 # Restart services
-docker-compose restart
+docker compose restart
 
 # Rebuild and restart
-docker-compose down && docker-compose up -d
+docker compose down && docker compose up -d
 ```
 
 ## Support

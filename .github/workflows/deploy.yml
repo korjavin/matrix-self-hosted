@@ -18,7 +18,7 @@ jobs:
 
       - name: Validate docker-compose.yml
         run: |
-          docker-compose config -q
+          docker compose config -q
 
       - name: Update deployment branch
         run: |
@@ -36,7 +36,7 @@ jobs:
           git push origin deploy --force
 
       - name: Trigger Portainer Redeploy Webhook
-        if: vars.PORTAINER_REDEPLOY_HOOK != ''
+        if: ${{ vars.PORTAINER_REDEPLOY_HOOK != '' }}
         uses: distributhor/workflow-webhook@v3
         with:
           webhook_url: ${{ vars.PORTAINER_REDEPLOY_HOOK }}
@@ -44,10 +44,12 @@ jobs:
         continue-on-error: true
 
       - name: Notify deployment status
+        env:
+          PORTAINER_REDEPLOY_HOOK: ${{ vars.PORTAINER_REDEPLOY_HOOK || '' }}
         run: |
           echo "🚀 Deployment completed successfully"
           echo "📝 Configuration updated in deploy branch"
-          if [ -n "${{ vars.PORTAINER_REDEPLOY_HOOK }}" ]; then
+          if [ -n "$PORTAINER_REDEPLOY_HOOK" ]; then
             echo "🔄 Portainer webhook triggered"
           else
             echo "⚠️  Portainer webhook not configured"

@@ -20,7 +20,7 @@ jobs:
       - name: Validate docker-compose.yml syntax
         run: |
           echo "Validating docker-compose.yml syntax..."
-          docker-compose config -q
+          docker compose config -q
           echo "✅ docker-compose.yml is valid"
 
       - name: Check environment template
