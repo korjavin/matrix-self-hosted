@@ -3,8 +3,15 @@ FROM vectorim/element-web:latest
 # Copy custom element configuration
 COPY element-config.json /app/config.json
 
-# Copy custom nginx configuration for unprivileged port
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copy complete nginx configuration to replace default
+COPY nginx.conf /etc/nginx/nginx.conf
+
+# Create writable temp directories
+RUN mkdir -p /tmp/client_body /tmp/proxy /tmp/fastcgi /tmp/uwsgi /tmp/scgi && \
+    chown -R nginx:nginx /tmp/client_body /tmp/proxy /tmp/fastcgi /tmp/uwsgi /tmp/scgi
 
 # Expose port 8080 instead of 80
 EXPOSE 8080
+
+# Override the default command to skip entrypoint scripts that cause conflicts
+CMD ["nginx", "-g", "daemon off;"]
