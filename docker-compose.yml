@@ -41,19 +41,25 @@ services:
       - "traefik.http.routers.matrix-wellknown.tls.certresolver=myresolver"
       - "traefik.http.routers.matrix-wellknown.priority=300"
       - "traefik.http.routers.matrix-wellknown.service=matrix-synapse"
-      # Matrix federation on port 8448 (highest priority for specific paths)
+      # Matrix federation on port 8448 (specific federation paths)
       - "traefik.http.routers.matrix-federation.rule=Host(`${MATRIX_DOMAIN:-matrix.example.com}`) && PathPrefix(`/_matrix/federation/`)"
       - "traefik.http.routers.matrix-federation.entrypoints=websecure"
       - "traefik.http.routers.matrix-federation.tls.certresolver=myresolver"
       - "traefik.http.routers.matrix-federation.priority=250"
       - "traefik.http.routers.matrix-federation.service=matrix-federation"
       - "traefik.http.services.matrix-federation.loadbalancer.server.port=8448"
-      # Matrix client and server APIs (lower priority for broader paths)
-      - "traefik.http.routers.matrix-synapse.rule=Host(`${MATRIX_DOMAIN:-matrix.example.com}`) && PathPrefix(`/_matrix/`)"
-      - "traefik.http.routers.matrix-synapse.entrypoints=websecure"
-      - "traefik.http.routers.matrix-synapse.tls.certresolver=myresolver"
-      - "traefik.http.routers.matrix-synapse.priority=200"
-      - "traefik.http.services.matrix-synapse.loadbalancer.server.port=7073"
+      # Matrix client API (explicit client paths only)
+      - "traefik.http.routers.matrix-client.rule=Host(`${MATRIX_DOMAIN:-matrix.example.com}`) && (PathPrefix(`/_matrix/client/`) || PathPrefix(`/_matrix/media/`) || PathPrefix(`/_matrix/static/`) || PathPrefix(`/_matrix/key/`))"
+      - "traefik.http.routers.matrix-client.entrypoints=websecure"
+      - "traefik.http.routers.matrix-client.tls.certresolver=myresolver"
+      - "traefik.http.routers.matrix-client.priority=200"
+      - "traefik.http.routers.matrix-client.service=matrix-synapse"
+      # Admin and other Synapse APIs
+      - "traefik.http.routers.matrix-admin.rule=Host(`${MATRIX_DOMAIN:-matrix.example.com}`) && PathPrefix(`/_synapse/`)"
+      - "traefik.http.routers.matrix-admin.entrypoints=websecure"
+      - "traefik.http.routers.matrix-admin.tls.certresolver=myresolver"
+      - "traefik.http.routers.matrix-admin.priority=200"
+      - "traefik.http.routers.matrix-admin.service=matrix-synapse"
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "curl -fSs http://localhost:7073/health || exit 1"]
