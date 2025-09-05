@@ -88,3 +88,4 @@ jobs:
           echo "📦 Synapse image: ${{ env.REGISTRY }}/${{ env.SYNAPSE_IMAGE_NAME }}:latest"
           echo "📦 Element image: ${{ env.REGISTRY }}/${{ env.ELEMENT_IMAGE_NAME }}:latest"
           echo "🔄 Images are ready for Portainer deployment!"
+          

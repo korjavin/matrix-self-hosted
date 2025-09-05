@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -20,23 +20,27 @@ jobs:
         run: |
           docker compose config -q
 
-      - name: Update image tags with commit SHA
+      - name: Prepare production deployment configuration
         run: |
-          # Update docker-compose to use specific commit SHA tags for production
-          sed -i "s|ghcr.io/korjavin/matrix-self-hosted/synapse:latest|ghcr.io/korjavin/matrix-self-hosted/synapse:sha-${GITHUB_SHA:0:7}|g" docker-compose.yml
-          sed -i "s|ghcr.io/korjavin/matrix-self-hosted/element:latest|ghcr.io/korjavin/matrix-self-hosted/element:sha-${GITHUB_SHA:0:7}|g" docker-compose.yml
+          echo "📝 Using latest image tags for production deployment"
+          echo "💡 Latest tags are kept in sync with main branch by build workflow"
+          
+          # Verify the compose file works
+          docker compose config --quiet
+          
+          echo "✅ Configuration validated for production deployment"
           
       - name: Update deployment branch
         run: |
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
           
-          # Create or checkout deploy branch
+          # Create or checkout deploy branch  
           git checkout -B deploy
           
-          # Add the updated docker-compose with specific image tags
-          git add docker-compose.yml
-          git commit -m "ci: Update deployment configuration with images sha-${GITHUB_SHA:0:7} - $(date -u '+%Y-%m-%d %H:%M:%S UTC')" || echo "No changes to commit"
+          # Copy the main configuration to deploy branch
+          git add .
+          git commit -m "ci: Update deployment configuration - $(date -u '+%Y-%m-%d %H:%M:%S UTC')" || echo "No changes to commit"
           
           # Push to deploy branch
           git push origin deploy --force
