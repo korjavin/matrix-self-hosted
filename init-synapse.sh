@@ -45,6 +45,10 @@ if [ ! -f "/data/$MATRIX_DOMAIN.signing.key" ]; then
     python -m synapse.app.homeserver --generate-keys --config-path /data/homeserver.yaml
 fi
 
+# Fix ownership of all files in /data to match Synapse user (UID 991, GID 991)
+echo "Setting correct ownership for /data files..."
+chown -R 991:991 /data/
+
 echo "Configuration completed successfully!"
 echo "Matrix server: https://$MATRIX_DOMAIN"
 echo "Element client: https://$ELEMENT_DOMAIN"
