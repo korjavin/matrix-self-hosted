@@ -36,10 +36,10 @@ jobs:
           git push origin deploy --force
 
       - name: Trigger Portainer Redeploy Webhook
-        if: ${{ secrets.PORTAINER_REDEPLOY_HOOK }}
+        if: vars.PORTAINER_REDEPLOY_HOOK != ''
         uses: distributhor/workflow-webhook@v3
         with:
-          webhook_url: ${{ secrets.PORTAINER_REDEPLOY_HOOK }}
+          webhook_url: ${{ vars.PORTAINER_REDEPLOY_HOOK }}
           webhook_secret: "trigger"
         continue-on-error: true
 
@@ -47,7 +47,7 @@ jobs:
         run: |
           echo "🚀 Deployment completed successfully"
           echo "📝 Configuration updated in deploy branch"
-          if [ -n "${{ secrets.PORTAINER_REDEPLOY_HOOK }}" ]; then
+          if [ -n "${{ vars.PORTAINER_REDEPLOY_HOOK }}" ]; then
             echo "🔄 Portainer webhook triggered"
           else
             echo "⚠️  Portainer webhook not configured"
