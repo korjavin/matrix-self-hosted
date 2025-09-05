@@ -189,7 +189,7 @@ Your server **is configured for Matrix federation** and can communicate with oth
 
 **Modern Matrix Federation (2019+)**:
 - Uses HTTPS port 443 with `.well-known` discovery
-- Your `.well-known/matrix/server` tells other servers to connect via `matrix.kfamcloud.com:443`
+- Your `.well-known/matrix/server` tells other servers to connect via `matrix.example.com:443`
 - Traefik routes federation requests to Synapse internally
 
 **Legacy Federation**:
@@ -200,23 +200,23 @@ Your server **is configured for Matrix federation** and can communicate with oth
 
 #### Test Server Discovery
 ```bash
-# Should return: {"m.server":"matrix.kfamcloud.com:443"}
-curl https://matrix.kfamcloud.com/.well-known/matrix/server
+# Should return: {"m.server":"matrix.example.com:443"}
+curl https://matrix.example.com/.well-known/matrix/server
 
 # Should return JSON with server version
-curl https://matrix.kfamcloud.com/_matrix/federation/v1/version
+curl https://matrix.example.com/_matrix/federation/v1/version
 ```
 
 #### Test Federation with Matrix.org
 ```bash
 # Test if Matrix.org can reach your server
-curl -X GET "https://federationtester.matrix.org/api/report?server_name=matrix.kfamcloud.com"
+curl -X GET "https://federationtester.matrix.org/api/report?server_name=matrix.example.com"
 
-# Or visit: https://federationtester.matrix.org/?domain=matrix.kfamcloud.com
+# Or visit: https://federationtester.matrix.org/?domain=matrix.example.com
 ```
 
 #### Test User Federation
-1. Create a user on your server: `@username:matrix.kfamcloud.com`
+1. Create a user on your server: `@username:matrix.example.com`
 2. Join a public room on Matrix.org (e.g., `#matrix:matrix.org`)
 3. Send a message - it should federate to other servers
 
@@ -224,7 +224,7 @@ curl -X GET "https://federationtester.matrix.org/api/report?server_name=matrix.k
 
 Your server meets all federation requirements:
 
-- ✅ **DNS**: `matrix.kfamcloud.com` resolves to your server
+- ✅ **DNS**: `matrix.example.com` resolves to your server
 - ✅ **HTTPS**: Traefik provides SSL certificates  
 - ✅ **Server Discovery**: `.well-known/matrix/server` configured
 - ✅ **Federation API**: Available at `/_matrix/federation/`
@@ -237,10 +237,125 @@ Your server meets all federation requirements:
 For additional federation compatibility, you can add DNS SRV records:
 
 ```dns
-_matrix._tcp.kfamcloud.com.  3600  IN  SRV  10 5 443 matrix.kfamcloud.com.
+_matrix._tcp.example.com.  3600  IN  SRV  10 5 443 matrix.example.com.
 ```
 
 **Note**: SRV records are optional since you have `.well-known` configured.
+
+## User Management
+
+Your Matrix server has **registration disabled** for security. Here are several methods to manually register users:
+
+### Method 1: Registration Tokens (Recommended)
+
+Create registration tokens that users can use to register themselves:
+
+```bash
+# Create a registration token (valid for 5 uses)
+docker exec -it matrix-synapse register_new_matrix_user \
+  --config /data/homeserver.yaml \
+  --generate-token \
+  --uses-allowed 5
+
+# Output will show: Generated token: ABC123XYZ
+```
+
+Then users can register at: `https://element.example.com/#/register` using the token.
+
+### Method 2: Direct User Creation
+
+Create users directly via Synapse admin command:
+
+```bash
+# Create a regular user
+docker exec -it matrix-synapse register_new_matrix_user \
+  --config /data/homeserver.yaml \
+  --user username \
+  --password yourpassword \
+  --no-admin \
+  https://matrix.example.com
+
+# Create an admin user  
+docker exec -it matrix-synapse register_new_matrix_user \
+  --config /data/homeserver.yaml \
+  --user admin \
+  --password adminpassword \
+  --admin \
+  https://matrix.example.com
+```
+
+### Method 3: Admin API (Programmatic)
+
+Use the Synapse Admin API to create users:
+
+```bash
+# First create an admin user (if you don't have one)
+# Then get an admin access token by logging in
+
+# Create user via API
+curl -X POST "https://matrix.example.com/_synapse/admin/v2/users/@username:matrix.example.com" \
+  -H "Authorization: Bearer YOUR_ADMIN_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "password": "userpassword",
+    "admin": false
+  }'
+```
+
+### Method 4: Temporary Registration Enable
+
+Temporarily enable public registration:
+
+```bash
+# 1. Edit homeserver.yaml in container
+docker exec -it matrix-synapse sed -i 's/enable_registration: false/enable_registration: true/' /data/homeserver.yaml
+
+# 2. Restart Synapse
+docker restart matrix-synapse
+
+# 3. Users can register at https://element.example.com/#/register
+
+# 4. Disable registration again
+docker exec -it matrix-synapse sed -i 's/enable_registration: true/enable_registration: false/' /data/homeserver.yaml
+docker restart matrix-synapse
+```
+
+### User Management Commands
+
+```bash
+# List all users (PostgreSQL)
+docker exec -it matrix-postgres psql -U synapse -d synapse \
+  -c "SELECT name FROM users;"
+
+# Deactivate a user
+curl -X POST "https://matrix.example.com/_synapse/admin/v1/deactivate/@username:matrix.example.com" \
+  -H "Authorization: Bearer YOUR_ADMIN_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"erase": false}'
+
+# Make user admin
+curl -X PUT "https://matrix.example.com/_synapse/admin/v2/users/@username:matrix.example.com" \
+  -H "Authorization: Bearer YOUR_ADMIN_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"admin": true}'
+```
+
+### Getting Admin Access Token
+
+To use the Admin API, you need an access token:
+
+1. Create an admin user using Method 2 above
+2. Login via Element web client at `https://element.example.com`
+3. Go to Settings → Help & About → Access Token
+4. Copy the token for API calls
+
+### User Format
+
+Matrix usernames follow the format: `@username:matrix.example.com`
+
+- Local part: `username` (what you specify in commands)
+- Server part: `matrix.example.com` (your domain)
+- Full Matrix ID: `@username:matrix.example.com`
 
 ### Useful Commands
 
