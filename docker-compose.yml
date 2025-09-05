@@ -1,6 +1,6 @@
 services:
   synapse-init:
-    image: ghcr.io/korjavin/matrix-self-hosted/synapse:latest
+    image: ghcr.io/korjavin/matrix-self-hosted/synapse:${IMAGE_TAG:-latest}
     container_name: matrix-synapse-init
     environment:
       - MATRIX_DOMAIN=${MATRIX_DOMAIN:-matrix.example.com}
@@ -18,7 +18,7 @@ services:
     restart: "no"
 
   synapse:
-    image: ghcr.io/korjavin/matrix-self-hosted/synapse:latest
+    image: ghcr.io/korjavin/matrix-self-hosted/synapse:${IMAGE_TAG:-latest}
     container_name: matrix-synapse
     environment:
       - UID=991
@@ -86,7 +86,7 @@ services:
       retries: 3
 
   element:
-    image: ghcr.io/korjavin/matrix-self-hosted/element:latest
+    image: ghcr.io/korjavin/matrix-self-hosted/element:${IMAGE_TAG:-latest}
     container_name: matrix-element
     networks:
       - matrix-network
