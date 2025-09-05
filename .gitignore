@@ -39,6 +39,6 @@ pids
 .docker/
 
 # Matrix specific
-homeserver.yaml
+# homeserver.yaml - Now tracked as template for Docker builds
 *.signing.key
 media_store/

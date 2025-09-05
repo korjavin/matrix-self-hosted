@@ -1,0 +1,185 @@
+# Configuration file for Synapse.
+#
+# This is a YAML file: see [1] for a quick introduction. Note in particular
+# that *indentation is important*: all the elements of a list or dictionary
+# should have the same indentation.
+#
+# [1] https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html
+
+server_name: "MATRIX_DOMAIN_PLACEHOLDER"
+
+pid_file: /data/homeserver.pid
+
+listeners:
+  # Main HTTPS listener
+  # For when matrix traffic is sent directly to synapse.
+  - port: 8008
+    tls: false
+    type: http
+    x_forwarded: true
+    bind_addresses: ['::1', '127.0.0.1', '0.0.0.0']
+
+    resources:
+      - names: [client, federation]
+        compress: false
+
+  # Federation listener
+  - port: 8448
+    tls: false
+    type: http
+    x_forwarded: true
+    bind_addresses: ['::1', '127.0.0.1', '0.0.0.0']
+
+    resources:
+      - names: [federation]
+
+database:
+  name: psycopg2
+  args:
+    user: POSTGRES_USER_PLACEHOLDER
+    password: POSTGRES_PASSWORD_PLACEHOLDER
+    database: POSTGRES_DB_PLACEHOLDER
+    host: postgres
+    port: 5432
+    cp_min: 5
+    cp_max: 10
+
+log_config: "/data/MATRIX_DOMAIN_PLACEHOLDER.log.config"
+
+media_store_path: /data/media_store
+
+# A secret which is used to sign access tokens
+registration_shared_secret: "REGISTRATION_SHARED_SECRET_PLACEHOLDER"
+
+# The shared secret used to compute passwords for the TURN server
+turn_shared_secret: "TURN_SHARED_SECRET_PLACEHOLDER"
+
+# The public URIs of the TURN server
+public_baseurl: https://MATRIX_DOMAIN_PLACEHOLDER/
+
+# Uncomment to enable registration
+# enable_registration: true
+# enable_registration_without_verification: true
+
+# Registration requires email verification by default
+# require_auth_for_profile_requests: false
+
+# Allow registration by anyone, but require admin approval
+registration_requires_token: true
+
+# Redis config for workers
+redis:
+  enabled: true
+  host: redis
+  port: 6379
+  # Optional password if you configured one
+  # password: <password>
+
+# Whether to serve a web client from the HTTP/HTTPS root resource.
+web_client_location: https://ELEMENT_DOMAIN_PLACEHOLDER/
+
+# Whether to enable password-based authentication for users
+password_config:
+  enabled: true
+  policy:
+    enabled: true
+    minimum_length: 8
+
+# Email configuration
+email:
+  smtp_host: localhost
+  smtp_port: 25
+  force_tls: false
+  require_transport_security: false
+  notif_from: "Your Friendly %(server_name)s homeserver <noreply@MATRIX_DOMAIN_PLACEHOLDER>"
+
+# Push notification settings
+push:
+  include_content: true
+
+# Signing Keys
+signing_key_path: "/data/MATRIX_DOMAIN_PLACEHOLDER.signing.key"
+
+# Old signing keys
+old_signing_keys: {}
+
+# Trusted key servers
+trusted_key_servers:
+  - server_name: "matrix.org"
+
+# Rate limiting
+rc_message:
+  per_second: 0.2
+  burst_count: 10
+
+rc_registration:
+  per_second: 0.17
+  burst_count: 3
+
+rc_login:
+  address:
+    per_second: 0.17
+    burst_count: 3
+  account:
+    per_second: 0.17
+    burst_count: 3
+  failed_attempts:
+    per_second: 0.17
+    burst_count: 3
+
+rc_admin_redaction:
+  per_second: 1
+  burst_count: 50
+
+rc_joins:
+  local:
+    per_second: 0.1
+    burst_count: 10
+  remote:
+    per_second: 0.01
+    burst_count: 10
+
+rc_3pid_validation:
+  per_second: 0.003
+  burst_count: 5
+
+rc_invites:
+  per_room:
+    per_second: 0.3
+    burst_count: 10
+  per_user:
+    per_second: 0.003
+    burst_count: 5
+
+# Federation settings
+federation_domain_whitelist: []
+federation_rr_transactions_per_room_per_second: 50
+
+# Media settings
+max_upload_size: 50M
+max_image_pixels: 32M
+
+# URL preview settings
+url_preview_enabled: false
+
+# Metrics
+enable_metrics: false
+
+# Registration tokens
+registration_shared_secret: "REGISTRATION_SHARED_SECRET_PLACEHOLDER"
+
+# Allow users to register new accounts
+enable_registration: false
+
+# Retention policy
+retention:
+  enabled: false
+
+# Require authenticated requests for profile information
+require_auth_for_profile_requests: false
+
+# Default room version
+default_room_version: "9"
+
+# Prevent non-admin users from creating rooms
+encryption_enabled_by_default_for_room_type: all
