@@ -177,9 +177,70 @@ Persistent volumes are configured for:
 #### Federation Issues
 
 **Other servers can't reach your server**:
-1. Verify SRV record: `dig _matrix._tcp.example.com SRV`
+1. Test server discovery: `curl https://matrix.example.com/.well-known/matrix/server`
 2. Test federation API: `curl https://matrix.example.com/_matrix/federation/v1/version`
-3. Check port 8448 is accessible externally (if not using .well-known)
+3. Verify federation with Matrix.org: See federation testing below
+
+## Matrix Federation
+
+Your server **is configured for Matrix federation** and can communicate with other Matrix servers (matrix.org, element.io, etc.).
+
+### How Federation Works
+
+**Modern Matrix Federation (2019+)**:
+- Uses HTTPS port 443 with `.well-known` discovery
+- Your `.well-known/matrix/server` tells other servers to connect via `matrix.kfamcloud.com:443`
+- Traefik routes federation requests to Synapse internally
+
+**Legacy Federation**:
+- Uses port 8448 directly (configured as fallback)
+- Only used by older servers that don't support `.well-known`
+
+### Testing Federation
+
+#### Test Server Discovery
+```bash
+# Should return: {"m.server":"matrix.kfamcloud.com:443"}
+curl https://matrix.kfamcloud.com/.well-known/matrix/server
+
+# Should return JSON with server version
+curl https://matrix.kfamcloud.com/_matrix/federation/v1/version
+```
+
+#### Test Federation with Matrix.org
+```bash
+# Test if Matrix.org can reach your server
+curl -X GET "https://federationtester.matrix.org/api/report?server_name=matrix.kfamcloud.com"
+
+# Or visit: https://federationtester.matrix.org/?domain=matrix.kfamcloud.com
+```
+
+#### Test User Federation
+1. Create a user on your server: `@username:matrix.kfamcloud.com`
+2. Join a public room on Matrix.org (e.g., `#matrix:matrix.org`)
+3. Send a message - it should federate to other servers
+
+### Federation Requirements ✅
+
+Your server meets all federation requirements:
+
+- ✅ **DNS**: `matrix.kfamcloud.com` resolves to your server
+- ✅ **HTTPS**: Traefik provides SSL certificates  
+- ✅ **Server Discovery**: `.well-known/matrix/server` configured
+- ✅ **Federation API**: Available at `/_matrix/federation/`
+- ✅ **Port 443**: Traefik routes federation traffic
+- ✅ **Port 8448**: Available as legacy fallback
+- ✅ **Signing Keys**: Generated during initialization
+
+### Optional: SRV Records
+
+For additional federation compatibility, you can add DNS SRV records:
+
+```dns
+_matrix._tcp.kfamcloud.com.  3600  IN  SRV  10 5 443 matrix.kfamcloud.com.
+```
+
+**Note**: SRV records are optional since you have `.well-known` configured.
 
 ### Useful Commands
 
