@@ -3,5 +3,8 @@ FROM vectorim/element-web:latest
 # Copy custom element configuration
 COPY element-config.json /app/config.json
 
-# The base image already sets up nginx to serve the files
-# No additional configuration needed
+# Copy custom nginx configuration for unprivileged port
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Expose port 8080 instead of 80
+EXPOSE 8080

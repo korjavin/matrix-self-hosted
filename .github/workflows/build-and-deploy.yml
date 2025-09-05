@@ -9,6 +9,7 @@ on:
       - 'homeserver.yaml'
       - 'log.config' 
       - 'element-config.json'
+      - 'nginx.conf'
       - 'init-synapse.sh'
       - 'docker-compose.yml'
       - '.github/workflows/build-and-deploy.yml'
