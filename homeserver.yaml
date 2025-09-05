@@ -8,6 +8,9 @@
 
 server_name: "MATRIX_DOMAIN_PLACEHOLDER"
 
+# Report usage statistics to matrix.org (set to false for privacy)
+report_stats: false
+
 pid_file: /data/homeserver.pid
 
 listeners:
