@@ -60,6 +60,7 @@ services:
       - "traefik.http.routers.matrix-admin.tls.certresolver=myresolver"
       - "traefik.http.routers.matrix-admin.priority=200"
       - "traefik.http.routers.matrix-admin.service=matrix-synapse"
+      - "traefik.http.services.matrix-synapse.loadbalancer.server.port=7073"
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "curl -fSs http://localhost:7073/health || exit 1"]
