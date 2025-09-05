@@ -120,7 +120,7 @@ jobs:
           git push origin deploy --force
 
       - name: Trigger Portainer Redeploy Webhook
-        if: ${{ secrets.PORTAINER_REDEPLOY_HOOK != '' }}
+        if: ${{ secrets.PORTAINER_REDEPLOY_HOOK }}
         uses: distributhor/workflow-webhook@v3
         with:
           webhook_url: ${{ secrets.PORTAINER_REDEPLOY_HOOK }}
@@ -129,7 +129,7 @@ jobs:
 
       - name: Deployment Summary
         env:
-          PORTAINER_REDEPLOY_HOOK: ${{ secrets.PORTAINER_REDEPLOY_HOOK || '' }}
+          PORTAINER_REDEPLOY_HOOK: ${{ secrets.PORTAINER_REDEPLOY_HOOK }}
         run: |
           echo "🚀 Build and deployment completed successfully!"
           echo "📦 Synapse image: ${{ env.REGISTRY }}/${{ env.SYNAPSE_IMAGE_NAME }}:${{ steps.sha.outputs.SHORT_SHA }}"
