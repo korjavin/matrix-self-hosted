@@ -124,13 +124,13 @@ well_known_client_content:
     base_url: "https://MATRIX_DOMAIN_PLACEHOLDER"
   m.identity_server:
     base_url: "https://vector.im"
-  test_config:
-    value: "testing"
 
 # Rate limiting
 rc_message:
-  per_second: 0.2
-  burst_count: 10
+  # This needs to match at least e2ee key sharing frequency plus a bit of headroom
+  # Note key sharing events are bursty
+  per_second: 0.5
+  burst_count: 30
 
 rc_registration:
   per_second: 0.17
@@ -170,6 +170,13 @@ rc_invites:
   per_user:
     per_second: 0.003
     burst_count: 5
+
+# Rate limiting for delayed event management (MSC4140)
+rc_delayed_event_mgmt:
+  # This needs to match at least the heart-beat frequency plus a bit of headroom
+  # Currently the heart-beat is every 5 seconds which translates into a rate of 0.2s
+  per_second: 1
+  burst_count: 20
 
 # Federation settings
 federation_domain_whitelist: []
@@ -217,12 +224,12 @@ widget_config:
 
 # Enable experimental MSCs for Matrix RTC and Element Call
 experimental_features:
-  msc3266_enabled: true  # Matrix RTC
-  msc3401_enabled: true  # Element Call
+  msc3266_enabled: true  # Matrix RTC room summary API
+  msc4222_enabled: true  # syncv2 state_after for client room state tracking  
+  msc4140_enabled: true  # Delayed events for proper call participation signalling
 
-# MSC3266: Matrix RTC Focus configuration
-rtc_focus:
-  default_focus_uri: "https://call.MATRIX_DOMAIN_PLACEHOLDER"
+# The maximum allowed duration by which sent events can be delayed, as per MSC4140
+max_event_delay_duration: 24h
 
 # Basic voice/video calling support  
 # Uses Coturn TURN server for WebRTC NAT traversal
