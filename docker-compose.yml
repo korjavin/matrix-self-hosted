@@ -149,27 +149,27 @@ services:
     environment:
       - REACT_APP_DEFAULT_HOMESERVER_URL=https://${MATRIX_DOMAIN:-matrix.example.com}
       - VITE_DEFAULT_HOMESERVER_URL=https://${MATRIX_DOMAIN:-matrix.example.com}
-    command: >
-      sh -c '
-      mkdir -p /tmp/config
-      cat > /tmp/config/config.json << EOF
-      {
-        "default_server_config": {
-          "m.homeserver": {
-            "base_url": "https://${MATRIX_DOMAIN:-matrix.example.com}",
-            "server_name": "${MATRIX_DOMAIN:-matrix.example.com}"
+    volumes:
+      - element_call_config:/app/config
+    command:
+      - sh
+      - -c  
+      - |
+        cat > /app/config.json << 'EOF'
+        {
+          "default_server_config": {
+            "m.homeserver": {
+              "base_url": "https://$${MATRIX_DOMAIN:-matrix.example.com}",
+              "server_name": "$${MATRIX_DOMAIN:-matrix.example.com}"
+            }
+          },
+          "features": {
+            "feature_group_calls": true,
+            "feature_knock": true
           }
-        },
-        "features": {
-          "feature_group_calls": true,
-          "feature_knock": true
         }
-      }
-      EOF
-      cd /app
-      ln -sf /tmp/config/config.json .
-      exec nginx -g "daemon off;"
-      '
+        EOF
+        exec nginx -g "daemon off;"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.element-call.rule=Host(`call.${MATRIX_DOMAIN:-matrix.example.com}`)"
@@ -192,6 +192,8 @@ volumes:
     name: matrix_redis_data
   coturn_data:
     name: matrix_coturn_data
+  element_call_config:
+    name: matrix_element_call_config
 
 networks:
   matrix-network:
