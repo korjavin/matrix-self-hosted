@@ -157,6 +157,7 @@ jobs:
           sed "s/\${IMAGE_TAG:-latest}/${{ steps.sha.outputs.SHORT_SHA }}/g" docker-compose.yml > docker-compose.prod.yml
           
           echo "Updated docker-compose.prod.yml with IMAGE_TAG=${{ steps.sha.outputs.SHORT_SHA }}"
+          cat docker-compose.prod.yml
 
       - name: Validate production configuration
         run: |
