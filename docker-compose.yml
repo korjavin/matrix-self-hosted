@@ -151,7 +151,8 @@ services:
       - VITE_DEFAULT_HOMESERVER_URL=https://${MATRIX_DOMAIN:-matrix.example.com}
     command: >
       sh -c '
-      cat > /app/config.json << EOF
+      mkdir -p /tmp/config
+      cat > /tmp/config/config.json << EOF
       {
         "default_server_config": {
           "m.homeserver": {
@@ -165,6 +166,8 @@ services:
         }
       }
       EOF
+      cd /app
+      ln -sf /tmp/config/config.json .
       exec nginx -g "daemon off;"
       '
     labels:
