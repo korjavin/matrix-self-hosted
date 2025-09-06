@@ -128,30 +128,17 @@ services:
       - REALM=${MATRIX_DOMAIN:-matrix.example.com}
       - AUTH_SECRET=${TURN_SHARED_SECRET:-}
       - EXTERNAL_IP=${EXTERNAL_IP:-}
-    command: |
-      bash -c "
-      # Auto-detect external IP if not set
-      if [ -z \"\$EXTERNAL_IP\" ]; then
-        EXTERNAL_IP=\$\$(curl -s ipinfo.io/ip 2>/dev/null || curl -s icanhazip.com 2>/dev/null || echo '127.0.0.1')
-        echo \"Auto-detected external IP: \$EXTERNAL_IP\"
+    command: >
+      sh -c '
+      if [ -z "$$EXTERNAL_IP" ]; then
+        EXTERNAL_IP=$$(curl -s ipinfo.io/ip 2>/dev/null || curl -s icanhazip.com 2>/dev/null || echo "127.0.0.1")
+        echo "Auto-detected external IP: $$EXTERNAL_IP"
+      else
+        echo "Using configured external IP: $$EXTERNAL_IP"
       fi
       
-      # Start turnserver with configuration
-      exec turnserver \
-        -v \
-        -L 0.0.0.0 \
-        -E \$EXTERNAL_IP \
-        -r \$REALM \
-        --min-port=49152 \
-        --max-port=49172 \
-        --use-auth-secret \
-        --static-auth-secret=\$AUTH_SECRET \
-        --no-tcp-relay \
-        --no-multicast-peers \
-        --no-cli \
-        --no-tls \
-        --no-dtls
-      "
+      exec turnserver -v -L 0.0.0.0 -E $$EXTERNAL_IP -r $$REALM --min-port=49152 --max-port=49172 --use-auth-secret --static-auth-secret=$$AUTH_SECRET --no-tcp-relay --no-multicast-peers --no-cli --no-tls --no-dtls
+      '
     networks:
       - matrix-network
     restart: unless-stopped
