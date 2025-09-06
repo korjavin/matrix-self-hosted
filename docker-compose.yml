@@ -231,4 +231,4 @@ volumes:
 networks:
   matrix-network:
     name: ${NETWORK_NAME:-matrix-network}
-    external: ${NETWORK_EXTERNAL:-true}EXTERNAL:-true}
+    external: ${NETWORK_EXTERNAL:-true}
