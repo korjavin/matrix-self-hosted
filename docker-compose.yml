@@ -124,19 +124,16 @@ services:
       - "3478:3478/tcp"
       - "3478:3478/udp" 
       - "49152-49172:49152-49172/udp"
+    environment:
+      - EXTERNAL_IP=${EXTERNAL_IP:-}
+      - MATRIX_DOMAIN=${MATRIX_DOMAIN:-matrix.example.com}
+      - TURN_SHARED_SECRET=${TURN_SHARED_SECRET:-}
     command: >
-      turnserver -v
-      --listening-ip=0.0.0.0
-      --realm=${MATRIX_DOMAIN:-matrix.example.com}
-      --min-port=49152
-      --max-port=49172
-      --use-auth-secret
-      --static-auth-secret=${TURN_SHARED_SECRET:-}
-      --no-tcp-relay
-      --no-multicast-peers
-      --no-cli
-      --no-tls
-      --no-dtls
+      sh -c '
+      EXTERNAL_IP=$${EXTERNAL_IP:-$$(curl -s ipinfo.io/ip 2>/dev/null || echo "127.0.0.1")}
+      echo "Using external IP: $$EXTERNAL_IP for realm: $$MATRIX_DOMAIN"
+      exec turnserver -v --listening-ip=0.0.0.0 --external-ip=$$EXTERNAL_IP --realm=$$MATRIX_DOMAIN --min-port=49152 --max-port=49172 --use-auth-secret --static-auth-secret=$$TURN_SHARED_SECRET --no-tcp-relay --no-multicast-peers --no-cli --no-tls --no-dtls
+      '
     networks:
       - matrix-network
     restart: unless-stopped
