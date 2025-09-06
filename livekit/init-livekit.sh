@@ -21,4 +21,4 @@ echo "LiveKit key: ${LIVEKIT_KEY}"
 echo "Config written to /etc/livekit.yaml"
 
 # Start LiveKit server
-exec livekit-server --config /etc/livekit.yaml
+exec /livekit-server --config /etc/livekit.yaml
