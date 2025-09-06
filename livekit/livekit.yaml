@@ -12,6 +12,5 @@ keys:
 room:
   auto_create: true
   empty_timeout: 5
-  departure_timeout: 20
 
 log_level: info
