@@ -120,14 +120,12 @@ serve_server_wellknown: true
 
 # Well-known server delegation
 well_known_client_content:
-  "m.homeserver":
-    "base_url": "https://MATRIX_DOMAIN_PLACEHOLDER"
-  "m.identity_server":
-    "base_url": "https://vector.im"
-  "org.matrix.msc3266.rtc_focus":
-    "focus_uri": "https://call.MATRIX_DOMAIN_PLACEHOLDER"
-  "io.element.call":
-    "widget_url": "https://call.MATRIX_DOMAIN_PLACEHOLDER"
+  m.homeserver:
+    base_url: "https://MATRIX_DOMAIN_PLACEHOLDER"
+  m.identity_server:
+    base_url: "https://vector.im"
+  org.matrix.msc3266.rtc_focus:
+    focus_uri: "https://call.MATRIX_DOMAIN_PLACEHOLDER"
 
 # Rate limiting
 rc_message:
