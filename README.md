@@ -498,36 +498,27 @@ docker compose up -d
 - Check browser permissions for microphone/camera
 - Test on different network (some corporate networks block RTP)
 
-## Element Call (Group Calling)
+## Element X Mobile App Calling
 
-Your Matrix server includes **Element Call** for advanced group calling features, especially for Element X mobile app.
+### Current Status
 
-### Features
+Your Matrix server supports **1:1 voice and video calls** through the Coturn TURN server.
 
-- **Group video calls** with multiple participants
-- **Screen sharing** support
-- **Element X mobile app** compatibility
-- **WebRTC group calling** with SFU architecture
+### Element X Mobile Compatibility
 
-### Access
+- **✅ 1:1 voice/video calls** - Should work with current Coturn setup
+- **❌ Group calling/Element Call** - Not currently implemented due to complexity
+- **⚠️ "MISSING_MATRIX_RTC_FOCUS" error** - This affects group calling widgets only
 
-Element Call is available at: `https://call.yourdomain.com`
+### Recommended Approach
 
-### Element X Mobile Support
+1. **Test 1:1 calling** in Element X mobile app - this should work
+2. **Use Element Web** for any group calling features if needed
+3. **Focus on basic calling functionality** which is fully operational
 
-Element X mobile app requires Element Call for voice/video calling. The "MISSING_MATRIX_RTC_FOCUS" error should be resolved with Element Call deployed.
+### Why Element Call is Not Included
 
-### Troubleshooting Element Call
-
-**"MISSING_MATRIX_RTC_FOCUS" error**:
-- Ensure Element Call container is running: `docker ps | grep element-call`
-- Check Element Call logs: `docker logs matrix-element-call`
-- Verify `call.yourdomain.com` resolves and is accessible
-
-**Element Call not loading**:
-- Check Traefik routing for Element Call service
-- Verify Element Call configuration is templated correctly
-- Test direct access: `curl https://call.yourdomain.com/config.json`
+Element Call requires complex container permissions and additional infrastructure that can be unstable. The core WebRTC functionality for 1:1 calls works reliably with just the Coturn TURN server.
 
 ### Useful Commands
 

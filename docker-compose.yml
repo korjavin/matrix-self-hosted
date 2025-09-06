@@ -141,37 +141,6 @@ services:
       - matrix-network
     restart: unless-stopped
 
-  element-call:
-    image: ghcr.io/element-hq/element-call:latest
-    container_name: matrix-element-call
-    environment:
-      - REACT_APP_DEFAULT_HOMESERVER_URL=https://${MATRIX_DOMAIN:-matrix.example.com}
-      - REACT_APP_CONFIG_ENDPOINT=/config.json
-    volumes:
-      - synapse_data:/data:ro
-      - element_call_config:/tmp/element-call
-    command: >
-      sh -c "
-      mkdir -p /tmp/element-call &&
-      cp /data/element-call-config.json /tmp/element-call/config.json &&
-      cd /app &&
-      ln -sf /tmp/element-call/config.json config.json &&
-      nginx -g 'daemon off;'
-      "
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.element-call.rule=Host(`call.${MATRIX_DOMAIN:-matrix.example.com}`)"
-      - "traefik.http.routers.element-call.entrypoints=websecure"
-      - "traefik.http.routers.element-call.tls.certresolver=myresolver"
-      - "traefik.http.services.element-call.loadbalancer.server.port=8080"
-    networks:
-      - matrix-network
-    restart: unless-stopped
-    depends_on:
-      synapse-init:
-        condition: service_completed_successfully
-      synapse:
-        condition: service_healthy
 
 volumes:
   synapse_data:
@@ -182,8 +151,6 @@ volumes:
     name: matrix_redis_data
   coturn_data:
     name: matrix_coturn_data
-  element_call_config:
-    name: matrix_element_call_config
 
 networks:
   matrix-network:

@@ -202,19 +202,5 @@ default_room_version: "9"
 # Prevent non-admin users from creating rooms
 encryption_enabled_by_default_for_room_type: all
 
-# Element Call widget configuration for group calling
-widget_urls:
-  - "https://call.MATRIX_DOMAIN_PLACEHOLDER"
-
-# Allow Element Call widgets
-widget_config:
-  allowed_widget_urls:
-    - "https://call.MATRIX_DOMAIN_PLACEHOLDER/*"
-  allow_cross_origin_widgets: true
-
-# Element Call integration
-element_call:
-  enabled: true
-  widget_url: "https://call.MATRIX_DOMAIN_PLACEHOLDER"
-  participant_timeout: 30000
-  check_interval: 5000
+# Basic voice/video calling support
+# Uses Coturn TURN server for WebRTC NAT traversal
