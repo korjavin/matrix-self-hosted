@@ -35,12 +35,9 @@ services:
         condition: service_healthy
     labels:
       - "traefik.enable=true"
-      # Well-known endpoints for Matrix server discovery (highest priority)
-      - "traefik.http.routers.matrix-wellknown.rule=Host(`${MATRIX_DOMAIN:-matrix.example.com}`) && PathPrefix(`/.well-known/`)"
-      - "traefik.http.routers.matrix-wellknown.entrypoints=websecure"
-      - "traefik.http.routers.matrix-wellknown.tls.certresolver=myresolver"
-      - "traefik.http.routers.matrix-wellknown.priority=300"
-      - "traefik.http.routers.matrix-wellknown.service=matrix-synapse"
+      # Well-known endpoints for Matrix server discovery (handled by dedicated service)
+      # Commented out to let dedicated wellknown service handle /.well-known/matrix/*
+      # - "traefik.http.routers.matrix-wellknown.rule=Host(`${MATRIX_DOMAIN:-matrix.example.com}`) && PathPrefix(`/.well-known/`)"
       # Matrix federation on port 8448 (specific federation paths)
       - "traefik.http.routers.matrix-federation.rule=Host(`${MATRIX_DOMAIN:-matrix.example.com}`) && PathPrefix(`/_matrix/federation/`)"
       - "traefik.http.routers.matrix-federation.entrypoints=websecure"
@@ -160,6 +157,22 @@ services:
     depends_on:
       synapse:
         condition: service_healthy
+
+  wellknown:
+    image: ghcr.io/korjavin/matrix-self-hosted/wellknown:${IMAGE_TAG:-latest}
+    container_name: matrix-wellknown
+    environment:
+      - MATRIX_DOMAIN=${MATRIX_DOMAIN:-matrix.example.com}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.matrix-wellknown.rule=Host(`${MATRIX_DOMAIN:-matrix.example.com}`) && PathPrefix(`/.well-known/matrix/`)"
+      - "traefik.http.routers.matrix-wellknown.entrypoints=websecure"
+      - "traefik.http.routers.matrix-wellknown.tls.certresolver=myresolver"
+      - "traefik.http.routers.matrix-wellknown.priority=400"
+      - "traefik.http.services.matrix-wellknown.loadbalancer.server.port=8080"
+    networks:
+      - matrix-network
+    restart: unless-stopped
 
 volumes:
   synapse_data:

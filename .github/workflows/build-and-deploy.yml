@@ -12,6 +12,7 @@ on:
       - 'nginx.conf'
       - 'init-synapse.sh'
       - 'element-call/**'
+      - 'wellknown/**'
       - 'docker-compose.yml'
       - '.github/workflows/build-and-deploy.yml'
   workflow_dispatch:
@@ -21,6 +22,7 @@ env:
   SYNAPSE_IMAGE_NAME: korjavin/matrix-self-hosted/synapse
   ELEMENT_IMAGE_NAME: korjavin/matrix-self-hosted/element
   ELEMENT_CALL_IMAGE_NAME: korjavin/matrix-self-hosted/element-call
+  WELLKNOWN_IMAGE_NAME: korjavin/matrix-self-hosted/wellknown
 
 jobs:
   build-and-deploy:
@@ -74,6 +76,15 @@ jobs:
             type=raw,value=${{ steps.sha.outputs.SHORT_SHA }}
             type=raw,value=latest,enable={{is_default_branch}}
 
+      - name: Extract metadata for Well-known
+        id: wellknown-meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.WELLKNOWN_IMAGE_NAME }}
+          tags: |
+            type=raw,value=${{ steps.sha.outputs.SHORT_SHA }}
+            type=raw,value=latest,enable={{is_default_branch}}
+
       - name: Build and push Synapse image
         uses: docker/build-push-action@v5
         with:
@@ -104,6 +115,17 @@ jobs:
           push: true
           tags: ${{ steps.element-call-meta.outputs.tags }}
           labels: ${{ steps.element-call-meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push Well-known image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./wellknown
+          file: ./wellknown/Dockerfile
+          push: true
+          tags: ${{ steps.wellknown-meta.outputs.tags }}
+          labels: ${{ steps.wellknown-meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -156,6 +178,7 @@ jobs:
           echo "📦 Synapse image: ${{ env.REGISTRY }}/${{ env.SYNAPSE_IMAGE_NAME }}:${{ steps.sha.outputs.SHORT_SHA }}"
           echo "📦 Element image: ${{ env.REGISTRY }}/${{ env.ELEMENT_IMAGE_NAME }}:${{ steps.sha.outputs.SHORT_SHA }}"
           echo "📦 Element Call image: ${{ env.REGISTRY }}/${{ env.ELEMENT_CALL_IMAGE_NAME }}:${{ steps.sha.outputs.SHORT_SHA }}"
+          echo "📦 Well-known image: ${{ env.REGISTRY }}/${{ env.WELLKNOWN_IMAGE_NAME }}:${{ steps.sha.outputs.SHORT_SHA }}"
           echo "🏷️  Image tag: ${{ steps.sha.outputs.SHORT_SHA }}"
           echo "📝 Deploy branch updated with production configuration"
           if [ -n "$PORTAINER_REDEPLOY_HOOK" ]; then

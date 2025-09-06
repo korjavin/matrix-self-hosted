@@ -1,0 +1,11 @@
+{
+  "m.homeserver": {
+    "base_url": "https://matrix.kfamcloud.com/"
+  },
+  "m.identity_server": {
+    "base_url": "https://vector.im"
+  },
+  "org.matrix.msc3266.rtc_focus": {
+    "focus_uri": "https://call.matrix.kfamcloud.com"
+  }
+}
