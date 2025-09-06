@@ -1,0 +1,56 @@
+# LiveKit server configuration for Matrix Element Call
+port: 7881
+bind_addresses:
+  - ""
+
+# API configuration
+rtc:
+  tcp_port: 7882
+  port_range_start: 50000
+  port_range_end: 50200
+  use_external_ip: true
+
+# Redis configuration (optional, using memory for now)
+# redis:
+#   address: redis:6379
+
+# Webhook configuration (optional)
+# webhook:
+#   api_key: your-webhook-api-key
+#   urls:
+#     - https://your-webhook-url
+
+# Node configuration
+region: "local"
+
+# Key and secret (will be overridden by environment variables)
+keys:
+  devkey: devsecret
+
+# Room configuration
+room:
+  auto_create: true
+  empty_timeout: 300s
+  departure_timeout: 20s
+
+# Audio configuration
+audio:
+  # Enable RED (Redundancy Encoding)
+  red: true
+  # Enable DTX (Discontinuous Transmission)
+  dtx: true
+
+# Video configuration  
+video:
+  # Enable simulcast
+  simulcast: true
+
+# Logging
+log_level: info
+
+# TURN server configuration (optional, will use Coturn)
+# turn:
+#   enabled: true
+#   domain: matrix.kfamcloud.com
+#   tls_port: 5349
+#   udp_port: 3478

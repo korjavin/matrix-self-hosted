@@ -70,6 +70,8 @@ Configure the following environment variables for your deployment:
 - `POSTGRES_USER`: Database username (default: `synapse`)
 - `POSTGRES_PASSWORD`: Database password (default: `changeme123`)
 - `POSTGRES_DB`: Database name (default: `synapse`)
+- `LIVEKIT_KEY`: LiveKit authentication key for Element Call (generate with: `openssl rand -hex 32`)
+- `LIVEKIT_SECRET`: LiveKit authentication secret for Element Call (generate with: `openssl rand -hex 32`)
 - `IMAGE_TAG`: Docker image tag (automatically set by GitOps workflow)
 
 ### DNS Configuration

@@ -8,7 +8,7 @@
   "org.matrix.msc4143.rtc_foci": [
     {
       "type": "livekit",
-      "livekit_service_url": "https://call.MATRIX_DOMAIN_PLACEHOLDER"
+      "livekit_service_url": "https://call.MATRIX_DOMAIN_PLACEHOLDER/jwt"
     }
   ]
 }

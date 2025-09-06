@@ -174,6 +174,47 @@ services:
       - matrix-network
     restart: unless-stopped
 
+  livekit:
+    image: livekit/livekit-server:latest
+    container_name: matrix-livekit
+    ports:
+      - "7881:7881/tcp"
+      - "7882:7882/tcp" 
+      - "50000-50200:50000-50200/udp"
+    environment:
+      - LIVEKIT_CONFIG=/etc/livekit.yaml
+    volumes:
+      - ./livekit.yaml:/etc/livekit.yaml:ro
+    networks:
+      - matrix-network
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.livekit.rule=Host(`call.${MATRIX_DOMAIN:-matrix.example.com}`) && PathPrefix(`/livekit`)"
+      - "traefik.http.routers.livekit.entrypoints=websecure"
+      - "traefik.http.routers.livekit.tls.certresolver=myresolver"
+      - "traefik.http.services.livekit.loadbalancer.server.port=7881"
+
+  lk-jwt-service:
+    image: ghcr.io/element-hq/lk-jwt-service:latest
+    container_name: matrix-lk-jwt-service
+    environment:
+      - LIVEKIT_URL=ws://livekit:7881
+      - LIVEKIT_KEY=${LIVEKIT_KEY:-devkey}
+      - LIVEKIT_SECRET=${LIVEKIT_SECRET:-devsecret}
+      - LIVEKIT_FULL_ACCESS_HOMESERVERS=${MATRIX_DOMAIN:-matrix.example.com}
+    networks:
+      - matrix-network
+    restart: unless-stopped
+    depends_on:
+      - livekit
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.lk-jwt.rule=Host(`call.${MATRIX_DOMAIN:-matrix.example.com}`) && PathPrefix(`/jwt`)"
+      - "traefik.http.routers.lk-jwt.entrypoints=websecure"
+      - "traefik.http.routers.lk-jwt.tls.certresolver=myresolver"
+      - "traefik.http.services.lk-jwt.loadbalancer.server.port=8080"
+
 volumes:
   synapse_data:
     name: matrix_synapse_data
