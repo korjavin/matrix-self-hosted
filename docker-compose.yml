@@ -1,6 +1,6 @@
 services:
   synapse-init:
-    image: ghcr.io/korjavin/matrix-self-hosted/synapse:${IMAGE_TAG:-latest}
+    image: ghcr.io/korjavin/matrix-self-hosted/synapse:6bf55a3
     container_name: matrix-synapse-init
     environment:
       - MATRIX_DOMAIN=${MATRIX_DOMAIN:-matrix.example.com}
@@ -18,7 +18,7 @@ services:
     restart: "no"
 
   synapse:
-    image: ghcr.io/korjavin/matrix-self-hosted/synapse:${IMAGE_TAG:-latest}
+    image: ghcr.io/korjavin/matrix-self-hosted/synapse:6bf55a3
     container_name: matrix-synapse
     environment:
       - UID=991
@@ -99,7 +99,7 @@ services:
       retries: 3
 
   element:
-    image: ghcr.io/korjavin/matrix-self-hosted/element:${IMAGE_TAG:-latest}
+    image: ghcr.io/korjavin/matrix-self-hosted/element:6bf55a3
     container_name: matrix-element
     networks:
       - matrix-network
@@ -141,7 +141,7 @@ services:
     restart: unless-stopped
 
   element-call:
-    image: ghcr.io/korjavin/matrix-self-hosted/element-call:${IMAGE_TAG:-latest}
+    image: ghcr.io/korjavin/matrix-self-hosted/element-call:6bf55a3
     container_name: matrix-element-call
     environment:
       - MATRIX_DOMAIN=${MATRIX_DOMAIN:-matrix.example.com}
@@ -159,7 +159,7 @@ services:
         condition: service_healthy
 
   wellknown:
-    image: ghcr.io/korjavin/matrix-self-hosted/wellknown:${IMAGE_TAG:-latest}
+    image: ghcr.io/korjavin/matrix-self-hosted/wellknown:6bf55a3
     container_name: matrix-wellknown
     environment:
       - MATRIX_DOMAIN=${MATRIX_DOMAIN:-matrix.example.com}
@@ -175,7 +175,7 @@ services:
     restart: unless-stopped
 
   livekit:
-    image: ghcr.io/korjavin/matrix-self-hosted/livekit:${IMAGE_TAG:-latest}
+    image: ghcr.io/korjavin/matrix-self-hosted/livekit:6bf55a3
     container_name: matrix-livekit
     ports:
       - "7881:7881/tcp"
