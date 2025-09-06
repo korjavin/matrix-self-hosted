@@ -175,16 +175,16 @@ services:
     restart: unless-stopped
 
   livekit:
-    image: livekit/livekit-server:latest
+    image: ghcr.io/korjavin/matrix-self-hosted/livekit:${IMAGE_TAG:-latest}
     container_name: matrix-livekit
     ports:
       - "7881:7881/tcp"
       - "7882:7882/tcp" 
       - "50000-50200:50000-50200/udp"
     environment:
-      - LIVEKIT_CONFIG=/etc/livekit.yaml
-    volumes:
-      - ./livekit.yaml:/etc/livekit.yaml:ro
+      - MATRIX_DOMAIN=${MATRIX_DOMAIN:-matrix.example.com}
+      - LIVEKIT_KEY=${LIVEKIT_KEY:-devkey}
+      - LIVEKIT_SECRET=${LIVEKIT_SECRET:-devsecret}
     networks:
       - matrix-network
     restart: unless-stopped
