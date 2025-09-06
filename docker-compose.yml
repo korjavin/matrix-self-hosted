@@ -118,27 +118,25 @@ services:
         condition: service_healthy
 
   coturn:
-    image: coturn/coturn:latest  
+    image: instrumentisto/coturn:latest
     container_name: matrix-coturn
     ports:
       - "3478:3478/tcp"
-      - "3478:3478/udp"
+      - "3478:3478/udp" 
       - "49152-49172:49152-49172/udp"
-    environment:
-      - REALM=${MATRIX_DOMAIN:-matrix.example.com}
-      - AUTH_SECRET=${TURN_SHARED_SECRET:-}
-      - EXTERNAL_IP=${EXTERNAL_IP:-}
     command: >
-      sh -c '
-      if [ -z "$$EXTERNAL_IP" ]; then
-        EXTERNAL_IP=$$(curl -s ipinfo.io/ip 2>/dev/null || curl -s icanhazip.com 2>/dev/null || echo "127.0.0.1")
-        echo "Auto-detected external IP: $$EXTERNAL_IP"
-      else
-        echo "Using configured external IP: $$EXTERNAL_IP"
-      fi
-      
-      exec turnserver -v -L 0.0.0.0 -E $$EXTERNAL_IP -r $$REALM --min-port=49152 --max-port=49172 --use-auth-secret --static-auth-secret=$$AUTH_SECRET --no-tcp-relay --no-multicast-peers --no-cli --no-tls --no-dtls
-      '
+      turnserver -v
+      --listening-ip=0.0.0.0
+      --realm=${MATRIX_DOMAIN:-matrix.example.com}
+      --min-port=49152
+      --max-port=49172
+      --use-auth-secret
+      --static-auth-secret=${TURN_SHARED_SECRET:-}
+      --no-tcp-relay
+      --no-multicast-peers
+      --no-cli
+      --no-tls
+      --no-dtls
     networks:
       - matrix-network
     restart: unless-stopped
