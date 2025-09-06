@@ -1,10 +1,12 @@
 FROM ghcr.io/element-hq/element-call:latest
 
-# Copy initialization script
-COPY init-element-call.sh /opt/init-element-call.sh
+# Make /app writable by nginx user
+USER root
+RUN chown -R nginx:nginx /app
+USER nginx
 
-# Make the script executable
-RUN chmod +x /opt/init-element-call.sh
+# Copy initialization script to docker-entrypoint.d with executable permissions
+COPY --chmod=755 init-element-call.sh /docker-entrypoint.d/20-init-element-call.sh
 
-# Use the initialization script as entrypoint
-ENTRYPOINT ["/opt/init-element-call.sh"]
+# Keep the default entrypoint and command
+CMD ["nginx", "-g", "daemon off;"]

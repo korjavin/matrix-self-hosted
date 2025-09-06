@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 set -e
 
 echo "Initializing Element Call configuration..."
@@ -26,6 +26,3 @@ EOF
 echo "Element Call configuration completed!"
 echo "Matrix server: https://${MATRIX_DOMAIN}"
 echo "Config written to /app/config.json"
-
-# Start nginx
-exec nginx -g "daemon off;"
