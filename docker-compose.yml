@@ -143,6 +143,24 @@ services:
       - matrix-network
     restart: unless-stopped
 
+  element-call:
+    image: ghcr.io/element-hq/element-call:latest
+    container_name: matrix-element-call
+    environment:
+      - REACT_APP_DEFAULT_HOMESERVER_URL=https://${MATRIX_DOMAIN:-matrix.example.com}
+      - VITE_DEFAULT_HOMESERVER_URL=https://${MATRIX_DOMAIN:-matrix.example.com}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.element-call.rule=Host(`call.${MATRIX_DOMAIN:-matrix.example.com}`)"
+      - "traefik.http.routers.element-call.entrypoints=websecure"
+      - "traefik.http.routers.element-call.tls.certresolver=myresolver"
+      - "traefik.http.services.element-call.loadbalancer.server.port=8080"
+    networks:
+      - matrix-network
+    restart: unless-stopped
+    depends_on:
+      synapse:
+        condition: service_healthy
 
 volumes:
   synapse_data:

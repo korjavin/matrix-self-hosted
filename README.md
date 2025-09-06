@@ -498,27 +498,30 @@ docker compose up -d
 - Check browser permissions for microphone/camera
 - Test on different network (some corporate networks block RTP)
 
-## Element X Mobile App Calling
+## Element Call (Mobile App Support)
 
-### Current Status
+Your Matrix server includes **Element Call** for Element X mobile app compatibility and group calling features.
 
-Your Matrix server supports **1:1 voice and video calls** through the Coturn TURN server.
+### Features
 
-### Element X Mobile Compatibility
+- **✅ Element X mobile calling** - Full voice/video support
+- **✅ Group video calls** with multiple participants  
+- **✅ Screen sharing** support
+- **✅ WebRTC calling** with TURN server integration
 
-- **✅ 1:1 voice/video calls** - Should work with current Coturn setup
-- **❌ Group calling/Element Call** - Not currently implemented due to complexity
-- **⚠️ "MISSING_MATRIX_RTC_FOCUS" error** - This affects group calling widgets only
+### Access
 
-### Recommended Approach
+Element Call is available at: `https://call.yourdomain.com`
 
-1. **Test 1:1 calling** in Element X mobile app - this should work
-2. **Use Element Web** for any group calling features if needed
-3. **Focus on basic calling functionality** which is fully operational
+### Element X Mobile Support
 
-### Why Element Call is Not Included
+Element X mobile app **requires Element Call** for voice/video calling. The "MISSING_MATRIX_RTC_FOCUS" error should now be resolved.
 
-Element Call requires complex container permissions and additional infrastructure that can be unstable. The core WebRTC functionality for 1:1 calls works reliably with just the Coturn TURN server.
+### Testing
+
+1. **Element X mobile app** - Voice/video calls should work
+2. **Element Web** - Group calling and advanced features
+3. **Cross-platform** - Calls between mobile and web clients
 
 ### Useful Commands
 
