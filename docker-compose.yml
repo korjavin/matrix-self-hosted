@@ -117,6 +117,43 @@ services:
       synapse:
         condition: service_healthy
 
+  coturn:
+    image: coturn/coturn:latest
+    container_name: matrix-coturn
+    ports:
+      - "3478:3478/tcp"
+      - "3478:3478/udp"
+      - "49152-49172:49152-49172/udp"
+    volumes:
+      - coturn_data:/var/lib/coturn
+    environment:
+      - COTURN_LISTENING_IP=0.0.0.0
+      - COTURN_REALM=${MATRIX_DOMAIN:-matrix.example.com}
+      - COTURN_STATIC_AUTH_SECRET=${TURN_SHARED_SECRET:-}
+      - COTURN_MIN_PORT=49152
+      - COTURN_MAX_PORT=49172
+    command: |
+      sh -c "
+      EXTERNAL_IP=$${EXTERNAL_IP:-$$(curl -s https://ipinfo.io/ip 2>/dev/null || curl -s https://icanhazip.com 2>/dev/null || echo '127.0.0.1')}
+      echo 'Detected external IP: '$$EXTERNAL_IP
+      turserver -v \
+        --listening-ip=0.0.0.0 \
+        --external-ip=$$EXTERNAL_IP \
+        --realm=${MATRIX_DOMAIN:-matrix.example.com} \
+        --min-port=49152 \
+        --max-port=49172 \
+        --use-auth-secret \
+        --static-auth-secret=${TURN_SHARED_SECRET:-} \
+        --no-tcp-relay \
+        --no-multicast-peers \
+        --no-cli \
+        --no-tls \
+        --no-dtls
+      "
+    networks:
+      - matrix-network
+    restart: unless-stopped
+
 volumes:
   synapse_data:
     name: matrix_synapse_data
@@ -124,6 +161,8 @@ volumes:
     name: matrix_postgres_data
   redis_data:
     name: matrix_redis_data
+  coturn_data:
+    name: matrix_coturn_data
 
 networks:
   matrix-network:

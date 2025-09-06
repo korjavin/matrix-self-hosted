@@ -181,6 +181,96 @@ Persistent volumes are configured for:
 2. Test federation API: `curl https://matrix.example.com/_matrix/federation/v1/version`
 3. Verify federation with Matrix.org: See federation testing below
 
+**Can't start conversations with Matrix.org users**:
+
+This usually indicates **outbound federation** issues (your server can't reach Matrix.org):
+
+```bash
+# Test if your server can resolve Matrix.org
+docker exec matrix-synapse nslookup matrix.org
+
+# Test if your server can reach Matrix.org federation
+docker exec matrix-synapse curl -s https://matrix.org/_matrix/federation/v1/version
+
+# Check Synapse logs for federation errors
+docker logs matrix-synapse | grep -i federation | tail -20
+
+# Test specific Matrix.org server lookup
+docker exec matrix-synapse curl -s "https://matrix.org/_matrix/federation/v1/query/profile?user_id=@user:matrix.org"
+```
+
+**Common outbound federation fixes**:
+
+1. **DNS Resolution**: Ensure your server can resolve external domains
+2. **Firewall**: Allow outbound HTTPS (port 443) connections
+3. **Network Policy**: Some hosting providers block outbound federation by default
+4. **IPv6 Issues**: Try disabling IPv6 if causing DNS problems
+
+**Check outbound connectivity**:
+```bash
+# Test basic internet connectivity
+docker exec matrix-synapse ping -c 3 8.8.8.8
+
+# Test HTTPS outbound
+docker exec matrix-synapse curl -s https://httpbin.org/ip
+
+# Test Matrix.org specifically
+docker exec matrix-synapse curl -s https://matrix.org/.well-known/matrix/server
+```
+
+#### Federation Authentication Testing
+
+**Important**: Direct API calls to federation endpoints will return `M_UNAUTHORIZED` without proper server-to-server authentication. This is normal and doesn't indicate a problem.
+
+**To test federation properly**:
+
+1. **Join a public Matrix.org room** in your Element client:
+   - Try joining `#matrix:matrix.org`
+   - If this works, your federation is functioning correctly
+
+2. **Search for Matrix.org users**:
+   - In Element, search for `@test:matrix.org` or similar
+   - Try starting a conversation
+
+3. **Check actual federation attempts in logs**:
+   ```bash
+   # Monitor federation attempts in real-time
+   docker logs -f matrix-synapse | grep -i federation
+   
+   # Check for specific Matrix.org federation activity
+   docker logs matrix-synapse 2>&1 | grep "matrix.org" | tail -20
+   ```
+
+**Expected behavior**: 
+- Direct `curl` calls to federation endpoints return `M_UNAUTHORIZED` (this is correct)
+- Federation works through client actions (joining rooms, messaging users)
+- Check logs for actual federation HTTP requests when using Element client
+
+#### Matrix.org Federation Denial
+
+If you see `403: Federation denied with matrix.org` in your logs, this means Matrix.org is blocking your server. This is common for new Matrix servers due to anti-spam measures.
+
+**Solutions**:
+
+1. **Wait and retry**: Matrix.org may automatically unblock your server after some time
+2. **Try other Matrix servers**: Test federation with smaller Matrix servers first
+3. **Join Matrix.org rooms**: Sometimes joining public rooms helps establish trust
+4. **Contact Matrix.org**: For persistent issues, contact Matrix.org administrators
+
+**Alternative test servers for federation**:
+```bash
+# Test with other Matrix servers instead of matrix.org
+@user:mozilla.org
+@user:kde.org  
+@user:tchncs.de
+```
+
+**Check if Matrix.org specifically blocks your server**:
+```bash
+# Monitor logs when attempting Matrix.org federation
+ssh pet.kfamcloud.com "sudo podman logs matrix-synapse | grep 'matrix.org'"
+```
+
 ## Matrix Federation
 
 Your server **is configured for Matrix federation** and can communicate with other Matrix servers (matrix.org, element.io, etc.).
@@ -356,6 +446,57 @@ Matrix usernames follow the format: `@username:matrix.example.com`
 - Local part: `username` (what you specify in commands)
 - Server part: `matrix.example.com` (your domain)
 - Full Matrix ID: `@username:matrix.example.com`
+
+## Voice and Video Calls
+
+Your Matrix server includes **Coturn** for voice and video calling support.
+
+### Prerequisites
+
+1. **External IP**: Automatically detected (or manually configured via `EXTERNAL_IP` in `.env`)
+2. **Port Configuration**: Ensure these ports are open on your firewall:
+   - `3478/tcp` and `3478/udp` (TURN server)
+   - `49152-49172/udp` (RTP media ports)
+
+### Setup
+
+**Option 1: Automatic IP Detection (Recommended)**
+```bash
+# Deploy with automatic IP detection
+docker compose up -d
+
+# Check detected IP in Coturn logs
+docker logs matrix-coturn | grep "Detected external IP"
+```
+
+**Option 2: Manual IP Configuration**
+```bash
+# Check your external IP (optional)
+./detect-ip.sh
+
+# Manually set in .env file if needed
+echo "EXTERNAL_IP=$(curl -s https://ipinfo.io/ip)" >> .env
+
+# Deploy
+docker compose up -d
+```
+
+3. **Test Voice/Video Calls**:
+   - Create two users on your Matrix server
+   - Start a voice or video call between them
+   - The call should work without the "Call is not supported" error
+
+### Troubleshooting Voice/Video Calls
+
+**"Call is not supported" error**:
+- Check that Coturn container is running: `docker ps | grep coturn`
+- Verify TURN configuration: `docker logs matrix-coturn`
+- Test TURN server connectivity
+
+**Calls connect but no audio/video**:
+- Verify firewall allows UDP ports 49152-49172
+- Check browser permissions for microphone/camera
+- Test on different network (some corporate networks block RTP)
 
 ### Useful Commands
 

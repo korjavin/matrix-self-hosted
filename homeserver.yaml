@@ -57,6 +57,11 @@ registration_shared_secret: "REGISTRATION_SHARED_SECRET_PLACEHOLDER"
 # The shared secret used to compute passwords for the TURN server
 turn_shared_secret: "TURN_SHARED_SECRET_PLACEHOLDER"
 
+# TURN server configuration for voice/video calls
+turn_uris:
+  - "turn:MATRIX_DOMAIN_PLACEHOLDER:3478?transport=udp"
+  - "turn:MATRIX_DOMAIN_PLACEHOLDER:3478?transport=tcp"
+
 # The public URIs of the TURN server
 public_baseurl: https://MATRIX_DOMAIN_PLACEHOLDER/
 
