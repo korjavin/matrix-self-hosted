@@ -44,11 +44,31 @@ echo
 echo "🔑 Generating Matrix secrets..."
 REGISTRATION_SHARED_SECRET=$(openssl rand -hex 32)
 TURN_SHARED_SECRET=$(openssl rand -hex 32)
+LIVEKIT_KEY=$(openssl rand -hex 32)
+LIVEKIT_SECRET=$(openssl rand -hex 32)
 
 echo "Generated registration secret: $REGISTRATION_SHARED_SECRET"
 echo "Generated TURN secret: $TURN_SHARED_SECRET"
+echo "Generated LiveKit key: $LIVEKIT_KEY"
+echo "Generated LiveKit secret: $LIVEKIT_SECRET"
 
 echo
+echo "🌐 Network and IP configuration:"
+# Auto-detect external IP
+echo "Detecting external IP address..."
+EXTERNAL_IP=$(curl -s https://ipinfo.io/ip)
+if [ -z "$EXTERNAL_IP" ]; then
+    echo "Could not automatically detect external IP."
+    read -p "Please enter your server's external IP address: " EXTERNAL_IP
+else
+    echo "Detected external IP: $EXTERNAL_IP"
+    read -p "Use this IP address? (Y/n): " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Nn]$ ]]; then
+        read -p "Please enter the correct IP address: " EXTERNAL_IP
+    fi
+fi
+
 read -p "Network name [matrix-network]: " NETWORK_NAME
 NETWORK_NAME=${NETWORK_NAME:-matrix-network}
 
@@ -82,6 +102,13 @@ POSTGRES_PASSWORD=$POSTGRES_PASSWORD
 # Matrix Secrets (auto-generated)
 REGISTRATION_SHARED_SECRET=$REGISTRATION_SHARED_SECRET
 TURN_SHARED_SECRET=$TURN_SHARED_SECRET
+
+# TURN Server Configuration
+EXTERNAL_IP=$EXTERNAL_IP
+
+# LiveKit Configuration for Element Call (auto-generated)
+LIVEKIT_KEY=$LIVEKIT_KEY
+LIVEKIT_SECRET=$LIVEKIT_SECRET
 
 # Network Configuration
 NETWORK_NAME=$NETWORK_NAME

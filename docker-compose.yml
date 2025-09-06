@@ -6,7 +6,7 @@ services:
       - MATRIX_DOMAIN=${MATRIX_DOMAIN:-matrix.example.com}
       - ELEMENT_DOMAIN=${ELEMENT_DOMAIN:-element.example.com}
       - POSTGRES_USER=${POSTGRES_USER:-synapse}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme123}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB:-synapse}
       - REGISTRATION_SHARED_SECRET=${REGISTRATION_SHARED_SECRET:-}
       - TURN_SHARED_SECRET=${TURN_SHARED_SECRET:-}
@@ -71,7 +71,7 @@ services:
     environment:
       - POSTGRES_DB=${POSTGRES_DB:-synapse}
       - POSTGRES_USER=${POSTGRES_USER:-synapse}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme123}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_INITDB_ARGS=--encoding=UTF-8 --lc-collate=C --lc-ctype=C
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -119,23 +119,19 @@ services:
     container_name: matrix-coturn
     ports:
       - "3478:3478/tcp"
-      - "3478:3478/udp" 
+      - "3478:3478/udp"
       - "49152-49172:49152-49172/udp"
     command:
-      - turnserver
-      - -v
-      - --listening-ip=0.0.0.0
-      - --external-ip=95.216.155.153
-      - --realm=${MATRIX_DOMAIN:-matrix.example.com}
-      - --min-port=49152
-      - --max-port=49172
-      - --use-auth-secret
-      - --static-auth-secret=${TURN_SHARED_SECRET:-}
-      - --no-tcp-relay
-      - --no-multicast-peers
-      - --no-cli
-      - --no-tls
-      - --no-dtls
+      - /bin/sh
+      - -c
+      - |
+        if [ -n "$${EXTERNAL_IP}" ]; then
+          exec turnserver -v --listening-ip=0.0.0.0 --external-ip=$${EXTERNAL_IP} --realm=${MATRIX_DOMAIN:-matrix.example.com} --min-port=49152 --max-port=49172 --use-auth-secret --static-auth-secret=${TURN_SHARED_SECRET:-} --no-tcp-relay --no-multicast-peers --no-cli --no-tls --no-dtls
+        else
+          exec turnserver -v --listening-ip=0.0.0.0 --realm=${MATRIX_DOMAIN:-matrix.example.com} --min-port=49152 --max-port=49172 --use-auth-secret --static-auth-secret=${TURN_SHARED_SECRET:-} --no-tcp-relay --no-multicast-peers --no-cli --no-tls --no-dtls
+        fi
+    environment:
+      - EXTERNAL_IP=${EXTERNAL_IP}
     networks:
       - matrix-network
     restart: unless-stopped
@@ -183,8 +179,8 @@ services:
       - "50000-50200:50000-50200/udp"
     environment:
       - MATRIX_DOMAIN=${MATRIX_DOMAIN:-matrix.example.com}
-      - LIVEKIT_KEY=${LIVEKIT_KEY:-devkey}
-      - LIVEKIT_SECRET=${LIVEKIT_SECRET:-devsecret}
+      - LIVEKIT_KEY=${LIVEKIT_KEY}
+      - LIVEKIT_SECRET=${LIVEKIT_SECRET}
     networks:
       - matrix-network
     restart: unless-stopped
@@ -200,9 +196,9 @@ services:
     container_name: matrix-lk-jwt-service
     command: /lk-jwt-service
     environment:
-      - LIVEKIT_URL=ws://livekit:7881
-      - LIVEKIT_KEY=${LIVEKIT_KEY:-devkey}
-      - LIVEKIT_SECRET=${LIVEKIT_SECRET:-devsecret}
+      - LIVEKIT_URL=wss://livekit.${MATRIX_DOMAIN}
+      - LIVEKIT_KEY=${LIVEKIT_KEY}
+      - LIVEKIT_SECRET=${LIVEKIT_SECRET}
       - LIVEKIT_FULL_ACCESS_HOMESERVERS=${MATRIX_DOMAIN:-matrix.example.com}
     networks:
       - matrix-network
@@ -223,10 +219,6 @@ volumes:
     name: matrix_postgres_data
   redis_data:
     name: matrix_redis_data
-  coturn_data:
-    name: matrix_coturn_data
-  element_call_config:
-    name: matrix_element_call_config
 
 networks:
   matrix-network:
