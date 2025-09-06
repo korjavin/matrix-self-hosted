@@ -35,6 +35,12 @@ sed -i "s/POSTGRES_DB_PLACEHOLDER/$POSTGRES_DB/g" /data/homeserver.yaml
 sed -i "s/REGISTRATION_SHARED_SECRET_PLACEHOLDER/$REGISTRATION_SHARED_SECRET/g" /data/homeserver.yaml
 sed -i "s/TURN_SHARED_SECRET_PLACEHOLDER/$TURN_SHARED_SECRET/g" /data/homeserver.yaml
 
+# Process Element Call config template
+echo "Processing Element Call configuration..."
+cp /opt/element-call-config.json /data/element-call-config.json
+sed -i "s/MATRIX_DOMAIN_PLACEHOLDER/$MATRIX_DOMAIN/g" /data/element-call-config.json
+sed -i "s/TURN_SHARED_SECRET_PLACEHOLDER/$TURN_SHARED_SECRET/g" /data/element-call-config.json
+
 # Process log config
 echo "Processing log configuration..."
 cp /opt/log.config /data/$MATRIX_DOMAIN.log.config

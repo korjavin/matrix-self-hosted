@@ -498,6 +498,37 @@ docker compose up -d
 - Check browser permissions for microphone/camera
 - Test on different network (some corporate networks block RTP)
 
+## Element Call (Group Calling)
+
+Your Matrix server includes **Element Call** for advanced group calling features, especially for Element X mobile app.
+
+### Features
+
+- **Group video calls** with multiple participants
+- **Screen sharing** support
+- **Element X mobile app** compatibility
+- **WebRTC group calling** with SFU architecture
+
+### Access
+
+Element Call is available at: `https://call.yourdomain.com`
+
+### Element X Mobile Support
+
+Element X mobile app requires Element Call for voice/video calling. The "MISSING_MATRIX_RTC_FOCUS" error should be resolved with Element Call deployed.
+
+### Troubleshooting Element Call
+
+**"MISSING_MATRIX_RTC_FOCUS" error**:
+- Ensure Element Call container is running: `docker ps | grep element-call`
+- Check Element Call logs: `docker logs matrix-element-call`
+- Verify `call.yourdomain.com` resolves and is accessible
+
+**Element Call not loading**:
+- Check Traefik routing for Element Call service
+- Verify Element Call configuration is templated correctly
+- Test direct access: `curl https://call.yourdomain.com/config.json`
+
 ### Useful Commands
 
 ```bash
