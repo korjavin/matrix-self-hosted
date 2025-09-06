@@ -124,6 +124,8 @@ well_known_client_content:
     "base_url": "https://MATRIX_DOMAIN_PLACEHOLDER"
   "m.identity_server":
     "base_url": "https://vector.im"
+  "org.matrix.msc3266.rtc_focus":
+    "focus_uri": "https://call.MATRIX_DOMAIN_PLACEHOLDER"
 
 # Rate limiting
 rc_message:
@@ -212,6 +214,24 @@ widget_config:
   allowed_widget_urls:
     - "https://call.MATRIX_DOMAIN_PLACEHOLDER/*"
   allow_cross_origin_widgets: true
+
+# Matrix RTC configuration for Element Call support
+experimental_features:
+  msc3266_enabled: true  # Enable Matrix RTC
+  msc3401_enabled: true  # Enable Element Call integration
+
+# Advertise Matrix RTC focus capability
+rtc_focus:
+  enabled: true
+  focus_uri: "https://call.MATRIX_DOMAIN_PLACEHOLDER"
+
+# Enable Matrix RTC in well-known
+serve_server_wellknown_matrix_rtc: true
+
+# Matrix RTC configuration
+matrix_rtc:
+  enabled: true
+  focus_selection_strategy: "oldest"
 
 # Basic voice/video calling support  
 # Uses Coturn TURN server for WebRTC NAT traversal
