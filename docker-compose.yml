@@ -149,9 +149,13 @@ services:
       - REACT_APP_CONFIG_ENDPOINT=/config.json
     volumes:
       - synapse_data:/data:ro
+      - element_call_config:/tmp/element-call
     command: >
       sh -c "
-      cp /data/element-call-config.json /app/config.json &&
+      mkdir -p /tmp/element-call &&
+      cp /data/element-call-config.json /tmp/element-call/config.json &&
+      cd /app &&
+      ln -sf /tmp/element-call/config.json config.json &&
       nginx -g 'daemon off;'
       "
     labels:
@@ -178,6 +182,8 @@ volumes:
     name: matrix_redis_data
   coturn_data:
     name: matrix_coturn_data
+  element_call_config:
+    name: matrix_element_call_config
 
 networks:
   matrix-network:
