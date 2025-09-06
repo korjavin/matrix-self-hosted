@@ -118,38 +118,40 @@ services:
         condition: service_healthy
 
   coturn:
-    image: coturn/coturn:latest
+    image: coturn/coturn:latest  
     container_name: matrix-coturn
     ports:
       - "3478:3478/tcp"
       - "3478:3478/udp"
       - "49152-49172:49152-49172/udp"
-    volumes:
-      - coturn_data:/var/lib/coturn
     environment:
-      - EXTERNAL_IP=${EXTERNAL_IP:-}
-      - TURN_SECRET=${TURN_SHARED_SECRET:-}
       - REALM=${MATRIX_DOMAIN:-matrix.example.com}
-    command: >
-      sh -c 'if [ -z "$$EXTERNAL_IP" ]; then
-        EXTERNAL_IP=$$(curl -s https://ipinfo.io/ip 2>/dev/null || curl -s https://icanhazip.com 2>/dev/null || echo "127.0.0.1");
-        echo "Auto-detected external IP: $$EXTERNAL_IP";
-      else
-        echo "Using configured external IP: $$EXTERNAL_IP";
-      fi;
-      turnserver -v
-        --listening-ip=0.0.0.0
-        --external-ip=$$EXTERNAL_IP
-        --realm=$$REALM
-        --min-port=49152
-        --max-port=49172
-        --use-auth-secret
-        --static-auth-secret=$$TURN_SECRET
-        --no-tcp-relay
-        --no-multicast-peers
-        --no-cli
-        --no-tls
-        --no-dtls'
+      - AUTH_SECRET=${TURN_SHARED_SECRET:-}
+      - EXTERNAL_IP=${EXTERNAL_IP:-}
+    command: |
+      bash -c "
+      # Auto-detect external IP if not set
+      if [ -z \"\$EXTERNAL_IP\" ]; then
+        EXTERNAL_IP=\$\$(curl -s ipinfo.io/ip 2>/dev/null || curl -s icanhazip.com 2>/dev/null || echo '127.0.0.1')
+        echo \"Auto-detected external IP: \$EXTERNAL_IP\"
+      fi
+      
+      # Start turnserver with configuration
+      exec turnserver \
+        -v \
+        -L 0.0.0.0 \
+        -E \$EXTERNAL_IP \
+        -r \$REALM \
+        --min-port=49152 \
+        --max-port=49172 \
+        --use-auth-secret \
+        --static-auth-secret=\$AUTH_SECRET \
+        --no-tcp-relay \
+        --no-multicast-peers \
+        --no-cli \
+        --no-tls \
+        --no-dtls
+      "
     networks:
       - matrix-network
     restart: unless-stopped
