@@ -194,7 +194,6 @@ services:
       - "traefik.http.routers.livekit.entrypoints=websecure"
       - "traefik.http.routers.livekit.tls.certresolver=myresolver"
       - "traefik.http.services.livekit.loadbalancer.server.port=7881"
-      - "gemini.redeploy=$(date +%s)"
 
   lk-jwt-service:
     image: ghcr.io/element-hq/lk-jwt-service:latest
@@ -232,4 +231,4 @@ volumes:
 networks:
   matrix-network:
     name: ${NETWORK_NAME:-matrix-network}
-    external: ${NETWORK_EXTERNAL:-true}
+    external: ${NETWORK_EXTERNAL:-true}EXTERNAL:-true}
